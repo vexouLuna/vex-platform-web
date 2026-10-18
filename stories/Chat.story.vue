@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { EmoteSet, toChatLine, type LogMessage, type LogModeration } from '../src/chat'
+import { EmoteSet, pairRedemptions, toChatLine, type LogEntry, type LogMessage, type LogModeration } from '../src/chat'
+import prod from '../tests/fixtures/log-chat-types.json'
 import { ChatLine } from '../src/vue'
 import UserCardDemo from './UserCardDemo.vue'
 
@@ -23,6 +24,8 @@ const lines = [
   msg('c', 'this was removed', { deleted_at: '2026-09-30T18:01:00Z' }),
   timeout,
 ].map((raw) => toChatLine(raw, emotes))
+// Real entries from prod (tests/fixtures/log-chat-types.json): highlighted, gigantified, a GIF, sub notices, a redemption.
+const types = pairRedemptions(prod.entries as LogEntry[]).map((e) => toChatLine(e))
 </script>
 
 <template>
@@ -32,6 +35,11 @@ const lines = [
         <ChatLine v-for="l in lines" :key="l.id" :line="l">
           <template #before><span class="vxp-mono vxp-muted" style="margin-right: 0.5ch">18:00</span></template>
         </ChatLine>
+      </div>
+    </Variant>
+    <Variant title="Message and notice types">
+      <div class="vxp story-frame chat">
+        <ChatLine v-for="l in types" :key="l.id" :line="l" />
       </div>
     </Variant>
     <Variant title="User cards">
