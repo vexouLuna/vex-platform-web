@@ -2,9 +2,10 @@
 import type { Tone } from './jobs'
 import type { Actor, AuditOut, AuditQuery } from './types'
 
-/** Who did it: `@login` for a user (only a user gets an @), `key <id>`, `job #<id>`, or the app itself (`appName`). */
+/** Who did it: `@login` for a user (only a user gets an @; `admin` for the admin password), `key <id>`, `job #<id>`, or the app itself (`appName`). */
 export function actorLabel(e: Pick<AuditOut, 'actor_kind' | 'actor_id' | 'actor_login' | 'via'>, appName = 'system'): string {
-  if (e.actor_kind === 'user') return e.actor_login ? `@${e.actor_login}` : e.actor_id === 'password' ? 'password' : (e.actor_id ?? 'user')
+  // The admin password signs in as a user without an id (its login is just "session").
+  if (e.actor_kind === 'user') return !e.actor_id ? 'admin' : e.actor_login ? `@${e.actor_login}` : e.actor_id === 'password' ? 'password' : e.actor_id
   if (e.actor_kind === 'api_key') return `key ${e.actor_id ?? ''}`.trim()
   if (e.actor_kind === 'job') return e.actor_id ? `job #${e.actor_id}` : 'job'
   return e.actor_kind === 'system' ? appName : e.actor_kind

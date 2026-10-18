@@ -130,6 +130,7 @@ describe('subjects and audit', () => {
       'app',
       '99',
     ])
+    expect([actorLabel(a('user', null, 'session')), actorLabel(a('user', null, null))]).toEqual(['admin', 'admin'])
   })
 
   it('shows what changed', () => {
