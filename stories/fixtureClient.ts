@@ -75,6 +75,10 @@ export function fixtureClient(): PlatformClient {
       if (m[2] === 'events') return json(url.searchParams.has('cursor') ? { items: [], next_cursor: 'end' } : { ...events, next_cursor: 'end' })
       if (m[2] && after[m[2]]) job.state = after[m[2]]!
       if (init?.method === 'PATCH') Object.assign(job, JSON.parse(String(init.body)))
+      if (m[2] === 'retry') {
+        const { step, at, pause_before } = JSON.parse(String(init?.body ?? '{}'))
+        Object.assign(job, { step: step ?? job.step, not_before: at ?? null, ...(pause_before ? { pause_before } : {}), finished_at: null })
+      }
       return json(job)
     },
   })

@@ -64,6 +64,8 @@ describe('PlatformClient', () => {
     await api.job(811)
     const [url, init] = fetch.mock.calls[0]!
     expect([url, init!.method, init!.body]).toEqual(['/api/v2/jobs/811/retry', 'POST', '{"step":"store"}'])
+    await api.retry(811, null, { at: '2026-10-18T00:00:00.000Z', pause_before: [] })
+    expect(fetch.mock.calls.at(-1)![1]!.body).toBe('{"step":null,"at":"2026-10-18T00:00:00.000Z","pause_before":[]}')
     expect((init!.headers as Record<string, string>)['x-csrf-token']).toBe('tok')
     expect((fetch.mock.calls[1]![1]!.headers as Record<string, string>)['x-csrf-token']).toBeUndefined()
   })
