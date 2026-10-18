@@ -1,5 +1,15 @@
 # @vex/platform-web
 
+## 0.11.0
+
+### Minor Changes
+
+- 7fdda9d: A batch retry includes succeeded runs again; when any are ticked, JobsBrowser first asks to confirm how many succeeded runs will rerun from their first step.
+
+### Patch Changes
+
+- c04ddec: `actorLabel` shows the admin-password sign-in (a user without an id) as `admin` again, not `@session`.
+
 ## 0.10.0
 
 ### Minor Changes
