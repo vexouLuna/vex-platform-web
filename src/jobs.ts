@@ -28,7 +28,8 @@ export function jobActions(job: Pick<JobOut, 'state' | 'cancel_requested'>) {
   return {
     pause: job.state === 'queued' || job.state === 'running',
     resume: job.state === 'paused',
-    retry: job.state === 'failed' || job.state === 'cancelled',
+    /** Any finished run (vex-platform 0.7+ for a succeeded one), from a step of its choice, now or later. */
+    retry: !isActive(job.state),
     // A cancel already asked for is waiting on a cooperative step; asking again changes nothing.
     cancel: isActive(job.state) && !job.cancel_requested,
     /** Pause gates and pause-next can be changed while the run is active. */
@@ -40,7 +41,8 @@ export type BatchAction = 'pause' | 'resume' | 'retry' | 'cancel'
 
 /** The runs among `jobs` that `action` applies to in their state; sending it to the others would be a 409. */
 export function batchTargets<J extends Pick<JobOut, 'state' | 'cancel_requested'>>(jobs: readonly J[], action: BatchAction): J[] {
-  return jobs.filter((j) => jobActions(j)[action])
+  // A batch retry is for runs that didn't finish: re-running succeeded ones is a choice made one run at a time.
+  return jobs.filter((j) => jobActions(j)[action] && !(action === 'retry' && j.state === 'succeeded'))
 }
 
 /** Where a run is in its steps: 0-based index of the current step, and the total. */

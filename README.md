@@ -30,7 +30,7 @@ Three entry points:
 
 | Import | What |
 |---|---|
-| `@vex/platform-web` | `PlatformClient`, `ProblemError`/`errorText`, the v2 types, and pure helpers (`jobActions`, `stepStates`, `progressText`, `subjectOf`, `actorLabel`, `auditFilterQuery`, `timeAgo`, `bytes`, …) |
+| `@vex/platform-web` | `PlatformClient`, `ProblemError`/`errorText`, the v2 types, and pure helpers (`jobActions`, `stepStates`, `progressText`, `subjectOf`, `actorLabel`/`auditActor`, `auditFilterQuery`, `timeAgo`, `bytes`, …) |
 | `@vex/platform-web/chat` | `tokenize`, `EmoteSet`, `resolveBadges`, `twitchColor`, `chatName`, `toChatLine` (a bot's v2 log entry → a chat line) `loadChannelEmotes(twitchId)` (7TV, BTTV and FFZ, straight from the providers) and `twitchUserLookup(url)` (a chatter's public profile from doomtp-bot's `/api/v2/twitch/users`) |
 | `@vex/platform-web/vue` | `createPlatformUi`, `usePoll`, `useCursorPages`, `useEventTail`, `useJobActions`, and the components below. Importing it loads `style.css` |
 
@@ -79,9 +79,10 @@ app.use(
 |---|---|
 | `JobsBrowser` | State tabs, kind and subject filters (`v-model:filters`), the first page polled, older pages on demand |
 | `JobsTable` | The rows alone |
-| `JobDetail` | One run: summary, steps with pause-before toggles, progress, payload, the event log, and pause / resume / run one step / retry from a step / cancel |
+| `JobDetail` | One run: summary, steps with pause-before toggles, progress, payload, the event log, and pause / resume / run one step / cancel, and a retry of any finished run from a step, now or later, with its own pause steps |
 | `JobEventLog` | An event log (`role=log`) that follows new lines |
 | `AuditBrowser` | The audit with by / action / target / actor kind / outcome filters, optionally one `scope` |
+| `ActorRef` | Who did something: a user as `@login` (id on hover, copied on click), a job as a link, a key or the app by name. Only users get an @ |
 | `AuditTable` | The rows alone; `#actor` and `#scope` slots |
 | `ChatLine` | One chat line: badges, name colour, emotes (with zero-width stacking), rewards, removed messages and notices; `#before`/`#after` slots for a timestamp or extra columns |
 | `ChatEmote` | One emote, with its menu button |

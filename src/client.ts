@@ -91,9 +91,13 @@ export class PlatformClient {
   resume(id: number, once = false): Promise<JobOut> {
     return this.request('POST', `/jobs/${id}/resume`, { once })
   }
-  /** From `step`, or where it stopped. */
-  retry(id: number, step?: string | null): Promise<JobOut> {
-    return this.request('POST', `/jobs/${id}/retry`, { step: step ?? null })
+  /**
+   * From `step`, or where it stopped (the first step for a succeeded run). `at`: start then instead of now (ISO 8601
+   * UTC). `pause_before`: the run's new pause steps, a retry from one of them waiting paused; left as they are when
+   * not given. Both need vex-platform 0.7+.
+   */
+  retry(id: number, step?: string | null, opts: { at?: string | null; pause_before?: string[] } = {}): Promise<JobOut> {
+    return this.request('POST', `/jobs/${id}/retry`, { step: step ?? null, ...opts })
   }
   cancel(id: number): Promise<JobOut> {
     return this.request('POST', `/jobs/${id}/cancel`)
