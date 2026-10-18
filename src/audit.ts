@@ -1,15 +1,23 @@
 // What a site needs to show audit rows: who did it, how it went, and what changed, as text.
 import type { Tone } from './jobs'
-import type { AuditOut, AuditQuery } from './types'
+import type { Actor, AuditOut, AuditQuery } from './types'
 
-/** Who did it: `@login` when known, else what they signed in with, or the app itself (`appName`). */
+/** Who did it: `@login` for a user (only a user gets an @; `admin` for the admin password), `key <id>`, `job #<id>`, or the app itself (`appName`). */
 export function actorLabel(e: Pick<AuditOut, 'actor_kind' | 'actor_id' | 'actor_login' | 'via'>, appName = 'system'): string {
-  if (e.actor_login) return `@${e.actor_login}`
+  // The admin password signs in as a user without an id (its login is just "session").
+  if (e.actor_kind === 'user') return !e.actor_id ? 'admin' : e.actor_login ? `@${e.actor_login}` : e.actor_id === 'password' ? 'password' : e.actor_id
   if (e.actor_kind === 'api_key') return `key ${e.actor_id ?? ''}`.trim()
-  if (e.actor_kind === 'user') return e.actor_id === 'password' ? 'password' : (e.actor_id ?? 'user')
-  if (e.actor_kind === 'job') return `job ${e.actor_id ?? ''}`.trim()
+  if (e.actor_kind === 'job') return e.actor_id ? `job #${e.actor_id}` : 'job'
   return e.actor_kind === 'system' ? appName : e.actor_kind
 }
+
+/** A job's `Actor` in the audit row's shape, for `actorLabel` and `actorTitle`. */
+export const auditActor = (a: Actor): Pick<AuditOut, 'actor_kind' | 'actor_id' | 'actor_login' | 'via'> => ({
+  actor_kind: a.kind,
+  actor_id: a.id,
+  actor_login: a.login,
+  via: a.via,
+})
 
 /** The raw actor, for a tooltip: `user:1234 via session`. */
 export const actorTitle = (e: Pick<AuditOut, 'actor_kind' | 'actor_id' | 'via'>): string =>

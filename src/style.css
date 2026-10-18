@@ -1,5 +1,5 @@
 /*
- * @vexoulz/platform-web: the variables every component reads, with neutral defaults, and the few control classes
+ * @vex/platform-web: the variables every component reads, with neutral defaults, and the few control classes
  * they share. A site restyles everything by setting the --vxp-* variables (on :root, or on any element around the
  * components); nothing else needs overriding. The defaults sit under :where(:root), which has no specificity, so a
  * site's plain :root rule wins whichever stylesheet loads last.

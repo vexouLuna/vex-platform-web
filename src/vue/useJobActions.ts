@@ -38,7 +38,8 @@ export function useJobActions(client: PlatformClient, done?: (job: JobOut) => vo
     resume: (id: number) => act('resume', () => client.resume(id), 'Resumed'),
     /** Run the next step, then pause again. */
     once: (id: number) => act('once', () => client.resume(id, true), 'Running one step'),
-    retry: (id: number, step?: string | null) => act('retry', () => client.retry(id, step), step ? `Retrying from ${step}` : 'Retrying'),
+    retry: (id: number, step?: string | null, opts: { at?: string | null; pause_before?: string[] } = {}) =>
+      act('retry', () => client.retry(id, step, opts), `${opts.at ? 'Scheduled a retry' : 'Retrying'}${step ? ` from ${step}` : ''}`),
     cancel: (id: number) => act('cancel', () => client.cancel(id), 'Cancelling'),
     update: (id: number, patch: JobUpdate, ok = 'Saved') => act('update', () => client.updateJob(id, patch), ok),
   }

@@ -1,0 +1,453 @@
+{
+  "_note": "Real entries from dtp.vexoul.net's public /api/v2 log (#moonmoon, #keeki_dechu), raw left out. Notifications carry the fragments, badges and color doomtp-bot adds from their raw event.",
+  "entries": [
+    {
+      "kind": "message",
+      "id": "f0898650-48eb-451e-b7a3-0ad6272cb14d",
+      "at": "2026-10-18T00:03:12.583000Z",
+      "user": {
+        "id": "23723631",
+        "login": "plumwinkle",
+        "display_name": "plumwinkle"
+      },
+      "text": "I just did a belly growling bed shaking pressure relieving fart :)",
+      "fragments": [
+        {
+          "type": "text",
+          "text": "I just did a belly growling bed shaking pressure relieving fart "
+        },
+        {
+          "type": "emote",
+          "text": ":)",
+          "emote_id": "1",
+          "emote": {
+            "format": [
+              "static"
+            ],
+            "owner_id": "0",
+            "emote_set_id": "0"
+          }
+        }
+      ],
+      "badges": [
+        {
+          "id": "1",
+          "info": "",
+          "set_id": "moments"
+        }
+      ],
+      "color": "#C67BE5",
+      "bits": 0,
+      "message_type": "channel_points_highlighted",
+      "reply_parent_id": null,
+      "reply_parent_user": null,
+      "reward_id": null,
+      "source_channel_id": null,
+      "is_self": false,
+      "is_command": false,
+      "source": "eventsub",
+      "received_at": "2026-10-18T00:03:12.830000Z",
+      "deleted_at": null,
+      "cleared_at": null,
+      "run": null
+    },
+    {
+      "kind": "message",
+      "id": "14f4d3ee-1b23-4343-9afb-a2236fabaad8",
+      "at": "2026-10-18T00:01:49.816000Z",
+      "user": {
+        "id": "63502935",
+        "login": "chompzkyhonk",
+        "display_name": "ChompzkyHonk"
+      },
+      "text": "mathilGoose",
+      "fragments": [
+        {
+          "type": "emote",
+          "text": "mathilGoose",
+          "emote_id": "emotesv2_a9578a9c236f4af4aa2c5d9108f48aa7",
+          "emote": {
+            "format": [
+              "static",
+              "animated"
+            ],
+            "owner_id": "25575995",
+            "emote_set_id": "497787417"
+          }
+        }
+      ],
+      "badges": [
+        {
+          "id": "1",
+          "info": "",
+          "set_id": "subtember-2026"
+        }
+      ],
+      "color": "#B22222",
+      "bits": 0,
+      "message_type": "power_ups_gigantified_emote",
+      "reply_parent_id": null,
+      "reply_parent_user": null,
+      "reward_id": null,
+      "source_channel_id": null,
+      "is_self": false,
+      "is_command": false,
+      "source": "eventsub",
+      "received_at": "2026-10-18T00:01:50.041000Z",
+      "deleted_at": null,
+      "cleared_at": null,
+      "run": null
+    },
+    {
+      "kind": "message",
+      "id": "0ce2b7e5-04b0-45de-8c4f-da7ab1bf1764",
+      "at": "2026-10-17T23:58:58.111000Z",
+      "user": {
+        "id": "21815120",
+        "login": "shoehornoplenty",
+        "display_name": "ShoeHornOPlenty"
+      },
+      "text": "[Happy Lets Go GIF by TheJoeCoin]",
+      "fragments": [
+        {
+          "type": "gif",
+          "text": "[Happy Lets Go GIF by TheJoeCoin]",
+          "gif": {
+            "id": "BsMaPK6JhnO89D3b6i",
+            "url": "https://media4.giphy.com/media/BsMaPK6JhnO89D3b6i/giphy.gif?cid=095d7a5dnrye6yhdgqudhb1i54cchwv5i4hg6rqia5vhgoxm&ep=v1_gifs_search&rid=giphy.gif&ct=g"
+          }
+        }
+      ],
+      "badges": [
+        {
+          "id": "3024",
+          "info": "24",
+          "set_id": "subscriber"
+        }
+      ],
+      "color": "#1E90FF",
+      "bits": 0,
+      "message_type": "text",
+      "reply_parent_id": null,
+      "reply_parent_user": null,
+      "reward_id": null,
+      "source_channel_id": null,
+      "is_self": false,
+      "is_command": false,
+      "source": "eventsub",
+      "received_at": "2026-10-17T23:58:58.382000Z",
+      "deleted_at": null,
+      "cleared_at": null,
+      "run": null
+    },
+    {
+      "kind": "notification",
+      "id": "19b8ea67-f071-4bbe-ae35-6c11173225f6",
+      "at": "2026-10-17T23:47:51.529000Z",
+      "user": {
+        "id": "55683912",
+        "login": "synthetiquee",
+        "display_name": "synthetiquee"
+      },
+      "type": "resub",
+      "payload": {
+        "system_message": "synthetiquee subscribed with Prime. They've subscribed for 3 months!",
+        "text": ":)",
+        "chatter": {
+          "id": "55683912",
+          "login": "synthetiquee"
+        },
+        "detail": {
+          "is_gift": false,
+          "is_prime": true,
+          "sub_tier": "1000",
+          "streak_months": null,
+          "gifter_user_id": null,
+          "duration_months": 1,
+          "gifter_user_name": null,
+          "cumulative_months": 3,
+          "gifter_user_login": null,
+          "gifter_is_anonymous": null
+        }
+      },
+      "source": "eventsub",
+      "fragments": [
+        {
+          "type": "emote",
+          "text": ":)",
+          "emote_id": "1",
+          "emote": {
+            "format": [
+              "static"
+            ],
+            "owner_id": "0",
+            "emote_set_id": "0"
+          }
+        }
+      ],
+      "badges": [
+        {
+          "id": "3",
+          "info": "3",
+          "set_id": "subscriber"
+        },
+        {
+          "id": "1",
+          "info": "",
+          "set_id": "elden-ring-recluse"
+        }
+      ],
+      "color": "#FF69B4"
+    },
+    {
+      "kind": "notification",
+      "id": "ebbdefd0-2da8-46b9-bea4-c55ea1eaa43d",
+      "at": "2026-10-18T00:01:35.520000Z",
+      "user": {
+        "id": "158794580",
+        "login": "fpp06",
+        "display_name": "fpp06"
+      },
+      "type": "resub",
+      "payload": {
+        "system_message": "fpp06 subscribed with Prime. They've subscribed for 18 months, currently on a 18 month streak!",
+        "text": "moon2CUTE",
+        "chatter": {
+          "id": "158794580",
+          "login": "fpp06"
+        },
+        "detail": {
+          "is_gift": false,
+          "is_prime": true,
+          "sub_tier": "1000",
+          "streak_months": 18,
+          "gifter_user_id": null,
+          "duration_months": 1,
+          "gifter_user_name": null,
+          "cumulative_months": 18,
+          "gifter_user_login": null,
+          "gifter_is_anonymous": null
+        }
+      },
+      "source": "eventsub",
+      "fragments": [
+        {
+          "type": "emote",
+          "text": "moon2CUTE",
+          "emote_id": "emotesv2_d61e039b4036461cb526d886adb49334",
+          "emote": {
+            "format": [
+              "static"
+            ],
+            "owner_id": "121059319",
+            "emote_set_id": "17937"
+          }
+        }
+      ],
+      "badges": [
+        {
+          "id": "12",
+          "info": "18",
+          "set_id": "subscriber"
+        },
+        {
+          "id": "1",
+          "info": "",
+          "set_id": "glitchcon2020"
+        }
+      ],
+      "color": "#35669A"
+    },
+    {
+      "kind": "notification",
+      "id": "3d211a20-3866-44d4-ac31-f8cab1396f22",
+      "at": "2026-10-18T00:00:59.860000Z",
+      "user": {
+        "id": "157776869",
+        "login": "sclentlst",
+        "display_name": "SClENTlST"
+      },
+      "type": "sub",
+      "payload": {
+        "system_message": "SClENTlST subscribed with Prime.",
+        "text": "",
+        "chatter": {
+          "id": "157776869",
+          "login": "sclentlst"
+        },
+        "detail": {
+          "is_prime": true,
+          "sub_tier": "1000",
+          "duration_months": 1
+        }
+      },
+      "source": "eventsub",
+      "fragments": [],
+      "badges": [
+        {
+          "id": "0",
+          "info": "1",
+          "set_id": "subscriber"
+        },
+        {
+          "id": "1",
+          "info": "",
+          "set_id": "turbo"
+        }
+      ],
+      "color": "#FF7F50"
+    },
+    {
+      "kind": "notification",
+      "id": "5a0468a1-1e3d-4417-a8cd-f5b59f2e227b",
+      "at": "2026-10-17T03:36:45.295000Z",
+      "user": {
+        "id": "189981467",
+        "login": "flip_a_flapjack",
+        "display_name": "flip_a_flapjack"
+      },
+      "type": "raid",
+      "payload": {
+        "system_message": "3 raiders from flip_a_flapjack have joined!",
+        "text": "",
+        "chatter": {
+          "id": "189981467",
+          "login": "flip_a_flapjack"
+        },
+        "detail": {
+          "user_id": "189981467",
+          "user_name": "flip_a_flapjack",
+          "user_login": "flip_a_flapjack",
+          "viewer_count": 3,
+          "profile_image_url": "https://static-cdn.jtvnw.net/jtv_user_pictures/7803d11d-2eab-4c7d-8665-16a4b87b3a13-profile_image-300x300.jpeg"
+        }
+      },
+      "source": "eventsub",
+      "fragments": [],
+      "badges": [
+        {
+          "id": "1",
+          "info": "",
+          "set_id": "glhf-pledge"
+        }
+      ],
+      "color": "#0DEDF7"
+    },
+    {
+      "kind": "notification",
+      "id": "e7521f39-25e2-4c82-a1eb-78cfe364caa1",
+      "at": "2026-10-16T11:51:29.831000Z",
+      "user": {
+        "id": "37928881",
+        "login": "cheekyferret",
+        "display_name": "CheekyFerret"
+      },
+      "type": "modiversary",
+      "payload": {
+        "system_message": "has been a moderator for 120 months!",
+        "text": "Ich feiere mein 10-jähriges Mod-Jubiläum!",
+        "chatter": {
+          "id": "37928881",
+          "login": "cheekyferret"
+        },
+        "detail": {
+          "months": 120
+        }
+      },
+      "source": "eventsub",
+      "fragments": [
+        {
+          "type": "text",
+          "text": "Ich feiere mein 10-jähriges Mod-Jubiläum!"
+        }
+      ],
+      "badges": [
+        {
+          "id": "1",
+          "info": "",
+          "set_id": "moderator"
+        },
+        {
+          "id": "108",
+          "info": "113",
+          "set_id": "subscriber"
+        }
+      ],
+      "color": "#00FFF7"
+    },
+    {
+      "kind": "notification",
+      "id": "0c4cec2d-6fcf-4cad-b569-913ca8266917",
+      "at": "2026-10-17T23:58:18.502000Z",
+      "user": {
+        "id": "34005112",
+        "login": "rgb13",
+        "display_name": "RGB13"
+      },
+      "type": "sub_gift",
+      "payload": {
+        "system_message": "RGB13 gifted a Tier 1 sub to Chuppar!",
+        "text": "",
+        "chatter": {
+          "id": "34005112",
+          "login": "rgb13"
+        },
+        "detail": {
+          "sub_tier": "1000",
+          "duration_months": 1,
+          "cumulative_total": 0,
+          "community_gift_id": "15098679018307532335",
+          "recipient_user_id": "93529949",
+          "recipient_user_name": "Chuppar",
+          "recipient_user_login": "chuppar"
+        }
+      },
+      "source": "eventsub",
+      "fragments": [],
+      "badges": [
+        {
+          "id": "3084",
+          "info": "94",
+          "set_id": "subscriber"
+        },
+        {
+          "id": "1",
+          "info": "",
+          "set_id": "no_audio"
+        }
+      ],
+      "color": "#009CDE"
+    },
+    {
+      "kind": "notification",
+      "id": "redemption:05ea3a46-07c4-4fc8-ac6f-aa1a7c8f36f1",
+      "at": "2026-10-17T03:10:46.398000Z",
+      "user": {
+        "id": "59580322",
+        "login": "thecraigatron",
+        "display_name": "TheCraigatron"
+      },
+      "type": "redemption",
+      "payload": {
+        "system_message": "TheCraigatron redeemed laugh",
+        "text": "",
+        "input": "",
+        "user": {
+          "id": "59580322",
+          "name": "thecraigatron",
+          "display": "TheCraigatron"
+        },
+        "reward": {
+          "id": "908a4677-6ea1-488c-b98c-d9cbaf47e55a",
+          "title": "laugh",
+          "cost": 1
+        },
+        "status": "unfulfilled"
+      },
+      "source": "eventsub",
+      "fragments": [],
+      "badges": [],
+      "color": null
+    }
+  ]
+}

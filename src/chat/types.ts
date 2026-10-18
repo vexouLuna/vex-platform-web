@@ -42,6 +42,8 @@ export interface RawFragment {
   emote_id?: string | null
   emote?: { emoteID?: string; id?: string } | null
   emoticon?: { emoticon_id?: string } | null
+  /** A GIPHY GIF (`type: 'gif'`): its id, and the archive adds `still` and `title`. Only the id is used. */
+  gif?: { id?: string | null; url?: string | null; still?: string | null; title?: string | null } | null
 }
 
 /** A chatter's badge: `{_id | setID, version}` (replay) or `{set_id, id}` (EventSub, doomtp-bot). */

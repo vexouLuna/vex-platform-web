@@ -1,4 +1,37 @@
-# @vexoulz/platform-web
+# @vex/platform-web
+
+## 0.11.0
+
+### Minor Changes
+
+- 7fdda9d: A batch retry includes succeeded runs again; when any are ticked, JobsBrowser first asks to confirm how many succeeded runs will rerun from their first step.
+
+### Patch Changes
+
+- c04ddec: `actorLabel` shows the admin-password sign-in (a user without an id) as `admin` again, not `@session`.
+
+## 0.10.0
+
+### Minor Changes
+
+- 670edd0: Chat lines render Twitch's message and notice types. A GIF from Twitch's GIF picker is a new `gif` token (an image from GIPHY's CDN, still under reduced motion), so code that switches on `Token['kind']` needs a case for it. `ChatLine` gains `messageType` (highlighted, intro and message-effect lines are set off, a gigantified emote is drawn large) and `system`: a sub notice with the user's message shows its system line over a normal chat line, with their colour, badges and emotes (from doomtp-bot's new notification `fragments`, `badges` and `color`). `pairRedemptions` folds a redemption's notice into the chat message sent with it.
+- 0f26d87: Retry later, from any step, with new pause steps; one way to show who did something.
+  
+  - `JobDetail` retries any finished run, a succeeded one too: from a step, now or in 15 min / 1 hour / 6 hours / 1 day
+    or at a set time, with the steps the retry pauses before. `client.retry(id, step, { at, pause_before })` and
+    `useJobActions().retry` take the same. A retry later or a succeeded run's needs vex-platform 0.7+. A batch retry still
+    skips succeeded runs.
+  - New `ActorRef`: a user as `@login` (id on hover, copied on click), a job as a link to `job #id`, a key or the app by
+    name. `JobDetail` and `AuditTable` use it. `actorLabel` gives an @ to users only: a job or the app with a login
+    (a kind name) was shown as `@archive`. New `auditActor` turns a job's `Actor` into the audit row's shape.
+
+## 0.9.0
+
+### Minor Changes
+
+- 44f3632: The package is now `@vex/platform-web`, installed from `github:vexouLuna/vex-platform-web`. Sites change their
+  imports from `@vexoulz/platform-web` to `@vex/platform-web` (and `/chat`, `/vue`) when they bump to this release.
+  The `createPlatformUi` injection key is now `Symbol('vex-platform-ui')`; nothing outside the package reads it.
 
 ## 0.8.0
 

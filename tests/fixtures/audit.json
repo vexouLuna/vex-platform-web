@@ -1,13 +1,13 @@
 {
   "items": [
     {
-      "id": 90, "at": "2026-09-30T18:00:00Z", "actor_kind": "user", "actor_id": "41234567", "actor_login": "vexoulz",
+      "id": 90, "at": "2026-09-30T18:00:00Z", "actor_kind": "user", "actor_id": "41234567", "actor_login": "example",
       "via": "session", "action": "job.enqueue", "target": "job:812", "scope": null, "scope_name": null, "outcome": "ok",
       "before": null, "after": { "kind": "upload" }, "detail": null, "request_id": "req-1", "job_run_id": 812
     },
     {
       "id": 89, "at": "2026-09-30T17:30:00Z", "actor_kind": "api_key", "actor_id": "k7", "actor_login": null,
-      "via": "api_key", "action": "cc.edit", "target": "command:hello", "scope": "41234567", "scope_name": "vexoulz",
+      "via": "api_key", "action": "cc.edit", "target": "command:hello", "scope": "41234567", "scope_name": "example",
       "outcome": "denied", "before": "hi", "after": "hello", "detail": null, "request_id": "req-2", "job_run_id": null
     },
     {
