@@ -41,6 +41,8 @@ export interface LogMessage {
   deleted_at: string | null
   cleared_at: string | null
   run: LogCommandRun | null
+  /** Not from the API: the reward's title and cost, which `pairRedemptions` takes from the redemption's notice. */
+  reward?: { title?: string; cost?: number | null } | null
 }
 
 export interface LogNotification {
@@ -58,6 +60,10 @@ export interface LogNotification {
     bits?: number
     [k: string]: unknown
   }
+  /** The user's own message (a resub's), with their badges and colour. Bots before 0.x leave them out. */
+  fragments?: LogMessage['fragments']
+  badges?: LogMessage['badges']
+  color?: string | null
   source: string
 }
 
@@ -153,24 +159,31 @@ export function toChatLine(e: LogEntry, emotes?: EmoteSet | null, badges?: RawBa
       tokens: tokenize(e.fragments, emotes),
       kind: 'message',
       noticeType: null,
+      messageType: e.message_type === 'text' || e.message_type === 'action' ? null : e.message_type,
       action: e.message_type === 'action',
       bits: e.bits || null,
-      // The log has the reward's id only; its title comes with the redemption notice.
-      reward: e.reward_id ? { title: 'Reward', cost: null, input: null } : null,
+      // The log has the reward's id only; its title comes with the redemption notice (`pairRedemptions`).
+      reward: e.reward_id ? { title: e.reward?.title || 'Reward', cost: e.reward?.cost ?? null, input: null } : null,
       removed: removal(e),
     }
   }
   if (e.kind === 'notification') {
     const p = e.payload
-    const said = p.text ? tokenize([{ text: p.text }], emotes) : []
+    const said = tokenize(e.fragments?.length ? e.fragments : p.text ? [{ text: p.text }] : [], emotes)
+    const system = p.system_message || e.type
+    // A notice with something said shows as its system line over a normal chat line; a redemption keeps its input
+    // inline, as the reward's text.
+    const chat = said.length > 0 && e.type !== 'redemption'
     return {
       ...base,
       id: e.id,
       user: nameOf(e.user),
       login: e.user?.login ?? null,
       userId: e.user?.id ?? null,
-      color: null,
-      tokens: [...text(p.system_message || e.type), ...(said.length ? [...text(' — '), ...said] : [])],
+      color: e.color ?? null,
+      badges: resolveBadges(e.badges, badges),
+      tokens: chat ? said : [...text(system), ...(said.length ? [...text(' — '), ...said] : [])],
+      system: chat ? system : null,
       kind: 'notice',
       noticeType: e.type,
       bits: p.bits || null,
@@ -189,4 +202,32 @@ export function toChatLine(e: LogEntry, emotes?: EmoteSet | null, badges?: RawBa
     kind: 'notice',
     noticeType: `moderation.${e.type}`,
   }
+}
+
+/** How far apart a redemption's notice and the chat message sent with it can be, in ms. */
+const REDEMPTION_MATCH_MS = 10_000
+
+/**
+ * A reward with text input shows up twice in the log: the redemption's notice and the chat message sent with it. This
+ * drops each notice that has its message (same user and reward, within 10s) and gives the message the reward's title
+ * and cost. Other entries pass through as they are, in their order.
+ */
+export function pairRedemptions<T extends LogEntry>(entries: readonly T[]): T[] {
+  const rewardOf = (n: LogNotification) => (n.payload.reward as { id?: string } | undefined)?.id
+  const notices = entries.filter((e): e is T & LogNotification => e.kind === 'notification' && e.type === 'redemption')
+  const paired = new Map<T, LogNotification>() // message → its notice
+  const used = new Set<T>()
+  for (const m of entries) {
+    if (m.kind !== 'message' || !m.reward_id) continue
+    const n = notices.find((n) => !used.has(n) && rewardOf(n) === m.reward_id && n.user?.id === m.user?.id
+      && Math.abs(Date.parse(n.at) - Date.parse(m.at)) <= REDEMPTION_MATCH_MS)
+    if (n) {
+      used.add(n)
+      paired.set(m, n)
+    }
+  }
+  return entries.filter((e) => !used.has(e)).map((e) => {
+    const n = paired.get(e)
+    return n ? { ...e, reward: n.payload.reward } : e
+  })
 }

@@ -35,7 +35,7 @@ export interface PlatformUi {
   userLookup: UserLookup | null
 }
 
-export const PLATFORM_UI: InjectionKey<PlatformUi> = Symbol('vexoulz-platform-ui')
+export const PLATFORM_UI: InjectionKey<PlatformUi> = Symbol('vex-platform-ui')
 
 export function resolveUi(o: PlatformUiOptions = {}): PlatformUi {
   return {

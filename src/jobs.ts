@@ -28,7 +28,8 @@ export function jobActions(job: Pick<JobOut, 'state' | 'cancel_requested'>) {
   return {
     pause: job.state === 'queued' || job.state === 'running',
     resume: job.state === 'paused',
-    retry: job.state === 'failed' || job.state === 'cancelled',
+    /** Any finished run (vex-platform 0.7+ for a succeeded one), from a step of its choice, now or later. */
+    retry: !isActive(job.state),
     // A cancel already asked for is waiting on a cooperative step; asking again changes nothing.
     cancel: isActive(job.state) && !job.cancel_requested,
     /** Pause gates and pause-next can be changed while the run is active. */

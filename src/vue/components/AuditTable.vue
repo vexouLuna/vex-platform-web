@@ -1,9 +1,10 @@
 <script setup lang="ts">
 // Audit rows: when, the action (and its outcome when it wasn't ok), where (the scope), the target with what changed,
 // who, and how they came in. Sites can render the actor and the scope themselves through the `actor` and `scope` slots.
-import { actorLabel, actorTitle, auditChange, outcomeTone } from '../../audit'
+import { actorLabel, auditChange, outcomeTone } from '../../audit'
 import type { AuditOut } from '../../types'
 import { usePlatformUi } from '../config'
+import ActorRef from './ActorRef.vue'
 import SubjectLink from './SubjectLink.vue'
 
 const props = withDefaults(
@@ -59,8 +60,8 @@ const where = (e: AuditOut) => {
               <div v-else-if="c.detail" class="change vxp-muted">{{ c.detail }}</div>
             </template>
           </td>
-          <td class="vxp-mono vxp-muted" :title="actorTitle(e)">
-            <slot name="actor" :entry="e" :label="actorLabel(e, ui.appName)">{{ actorLabel(e, ui.appName) }}</slot>
+          <td class="vxp-mono vxp-muted">
+            <slot name="actor" :entry="e" :label="actorLabel(e, ui.appName)"><ActorRef :actor="e" /></slot>
           </td>
           <td><span class="vxp-chip">{{ e.via }}</span></td>
         </tr>

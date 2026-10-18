@@ -1,10 +1,10 @@
 {
-  "name": "@vexoulz/platform-web",
-  "version": "0.8.0",
+  "name": "@vex/platform-web",
+  "version": "0.11.0",
   "private": true,
   "type": "module",
   "description": "Web side of vex-platform: a client for its /api/v2 jobs and audit, Vue components for them, and Twitch chat rendering (emotes, badges, colours)",
-  "repository": "github:vEXOULZ/vex-platform-web",
+  "repository": "github:vexouLuna/vex-platform-web",
   "sideEffects": [
     "*.css",
     "./dist/vue.js"
@@ -42,7 +42,7 @@
     "release": "changeset version"
   },
   "peerDependencies": {
-    "vue": "^3.5.0"
+    "vue": "^3.5.44"
   },
   "peerDependenciesMeta": {
     "vue": {

@@ -27,9 +27,12 @@ export interface EmoteLayer {
  */
 export type EmoteToken = { kind: 'emote'; overlays: EmoteLayer[] } & EmoteLayer
 
-export type Token = { kind: 'text'; text: string } | EmoteToken
+/** A GIPHY GIF sent from Twitch's GIF picker: the animated GIF, its still frame and the text Twitch shows for it. */
+export type GifToken = { kind: 'gif'; id: string; src: string; still: string; title: string }
 
-type Part = { kind: 'space'; text: string } | { kind: 'word'; text: string } | { kind: 'emote'; emote: Emote }
+export type Token = { kind: 'text'; text: string } | EmoteToken | GifToken
+
+type Part = { kind: 'space'; text: string } | { kind: 'word'; text: string } | { kind: 'emote'; emote: Emote } | { kind: 'gif'; gif: GifToken }
 
 export interface Badge {
   setId: string
@@ -65,9 +68,19 @@ export interface ChatLine {
   color: string | null
   badges: Badge[]
   tokens: Token[]
-  /** `notice`: a sub, gift, raid, redemption or moderation, with its text in `tokens` and its type in `noticeType`. */
+  /**
+   * `notice`: a sub, gift, raid, redemption or moderation, with its text in `tokens` and its type in `noticeType`. A
+   * notice that carries the user's own message (a resub's) has its system text in `system` and the message in `tokens`,
+   * and renders as that line over a normal chat line.
+   */
   kind: 'message' | 'notice'
   noticeType: string | null
+  system?: string | null
+  /**
+   * Twitch's message type when it is not plain `text`: `channel_points_highlighted`, `channel_points_sub_only`,
+   * `user_intro`, `power_ups_gigantified_emote`, `power_ups_message_effect`.
+   */
+  messageType?: string | null
   /** A /me message. */
   action: boolean
   bits: number | null
@@ -96,9 +109,27 @@ export function chatName(user: string, login: string | null, mode: NameMode = 'd
   return { name: user, login: null }
 }
 
-/** Fragments as words, the gaps between them (original whitespace kept) and emotes. */
+const GIPHY_ID = /^[A-Za-z0-9]{1,64}$/
+const GIPHY_URL = /^https:\/\/media\d*\.giphy\.com\/media\/([A-Za-z0-9]{1,64})\//
+
+/** A `gif` fragment as a token, or null without a GIPHY id. Images only ever come from GIPHY's own CDN. */
+function gifOf(f: RawFragment): GifToken | null {
+  const given = f.gif?.id ?? f.gif?.url?.match(GIPHY_URL)?.[1]
+  if (!given || !GIPHY_ID.test(given)) return null
+  const media = `https://media.giphy.com/media/${given}`
+  const title = f.text.trim().replace(/^\[(.*)\]$/, '$1').trim() || 'GIF'
+  return { kind: 'gif', id: given, src: `${media}/giphy.gif`, still: `${media}/giphy_s.gif`, title }
+}
+
+/** Fragments as words, the gaps between them (original whitespace kept), emotes and GIFs. */
 function* parts(fragments: readonly RawFragment[], emotes?: EmoteSet | null): Generator<Part> {
   for (const f of fragments) {
+    // doomtp-bot's fragments say `type: 'gif'`; the archive's replay-shaped ones only carry the `gif`.
+    const gif = f.gif ? gifOf(f) : null
+    if (gif) {
+      yield { kind: 'gif', gif }
+      continue
+    }
     // Replay fragments carry both emote.emoteID and emote.id, which is `<id>;<start>;<end>`: the clean one first, and
     // never the offsets.
     const nativeId = f.emote_id ?? f.emote?.emoteID ?? f.emote?.id ?? f.emoticon?.emoticon_id
@@ -146,7 +177,7 @@ export function tokenize(fragments: readonly RawFragment[] | null | undefined, e
 
   // BTTV modifiers seen so far, and what was typed with them, until an emote comes.
   let pending: Modifier[] = []
-  let held: Part[] = []
+  let held: Exclude<Part, { kind: 'gif' }>[] = []
   const release = () => {
     for (const p of held) {
       if (p.kind === 'emote') pushEmote(layer(p.emote))
@@ -157,6 +188,11 @@ export function tokenize(fragments: readonly RawFragment[] | null | undefined, e
   }
 
   for (const part of parts(fragments ?? [], emotes)) {
+    if (part.kind === 'gif') {
+      release()
+      out.push(part.gif)
+      continue
+    }
     if (part.kind !== 'emote') {
       if (part.kind === 'space' && pending.length) held.push(part)
       else {

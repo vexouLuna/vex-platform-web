@@ -97,7 +97,7 @@ const chosen = computed(() => {
 const BATCH: { action: BatchAction; label: string; title: string }[] = [
   { action: 'resume', label: 'Resume', title: 'The paused ones' },
   { action: 'pause', label: 'Pause', title: 'The queued and running ones' },
-  { action: 'retry', label: 'Retry', title: 'The failed and cancelled ones, from where they stopped' },
+  { action: 'retry', label: 'Retry', title: 'The finished ones: failed and cancelled from where they stopped, succeeded from the start' },
 ]
 const cancellable = computed(() => batchTargets(chosen.value, 'cancel').length)
 const batch = useJobBatch(props.client, ({ ok }) => {
@@ -109,6 +109,17 @@ const dialog = ref<HTMLDialogElement | null>(null)
 function cancelChosen() {
   dialog.value?.close()
   batch.run('cancel', chosen.value)
+}
+// Re-running succeeded runs redoes their work (uploads too), so a batch with any asks first.
+const rerun = computed(() => chosen.value.filter((j) => j.state === 'succeeded').length)
+const rerunDialog = ref<HTMLDialogElement | null>(null)
+function runBatch(action: BatchAction) {
+  if (action === 'retry' && rerun.value) rerunDialog.value?.showModal()
+  else batch.run(action, chosen.value)
+}
+function retryChosen() {
+  rerunDialog.value?.close()
+  batch.run('retry', chosen.value)
 }
 
 defineExpose({ refresh: pages.refresh })
@@ -162,7 +173,7 @@ defineExpose({ refresh: pages.refresh })
           :title="b.title"
           :disabled="!!batch.busy.value || !batchTargets(chosen, b.action).length"
           :aria-busy="batch.busy.value === b.action"
-          @click="batch.run(b.action, chosen)"
+          @click="runBatch(b.action)"
         >{{ b.label }} {{ batchTargets(chosen, b.action).length }}</button>
         <button
           type="button"
@@ -190,6 +201,17 @@ defineExpose({ refresh: pages.refresh })
       <div class="actions">
         <button type="button" class="vxp-btn" @click="dialog?.close()">Keep them</button>
         <button type="button" class="vxp-btn danger-solid" @click="cancelChosen">Cancel {{ cancellable }}</button>
+      </div>
+    </dialog>
+    <dialog ref="rerunDialog" class="vxp-dialog" aria-labelledby="vxp-batch-rerun-title">
+      <h2 id="vxp-batch-rerun-title">Rerun {{ rerun }} succeeded job{{ rerun === 1 ? '' : 's' }}?</h2>
+      <p>
+        {{ rerun === 1 ? 'It runs again from the first step and redoes all its work.' : 'They run again from the first step and redo all their work.' }}
+        <template v-if="batchTargets(chosen, 'retry').length > rerun">The {{ batchTargets(chosen, 'retry').length - rerun }} other finished ones retry from where they stopped.</template>
+      </p>
+      <div class="actions">
+        <button type="button" class="vxp-btn" @click="rerunDialog?.close()">Don't retry</button>
+        <button type="button" class="vxp-btn primary" @click="retryChosen">Retry {{ batchTargets(chosen, 'retry').length }}</button>
       </div>
     </dialog>
   </div>

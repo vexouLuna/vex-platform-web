@@ -9,7 +9,7 @@ describe('messages', () => {
 
   it('looks emotes up 7TV → FFZ → BTTV and keeps whitespace', () => {
     const tokens = tokenize([{ text: 'hi catJAM  monkaS Clap!' }], emotes)
-    expect(tokens.map((t) => (t.kind === 'text' ? t.text : `[${t.emote.provider}:${t.emote.code}]`))).toEqual([
+    expect(tokens.map((t) => (t.kind === 'text' ? t.text : t.kind === 'gif' ? `<${t.id}>` : `[${t.emote.provider}:${t.emote.code}]`))).toEqual([
       'hi ',
       '[7tv:catJAM]',
       '  ',
@@ -53,6 +53,7 @@ describe('messages', () => {
     const show = (text: string) =>
       tokenize([{ text }], set).map((t) => {
         if (t.kind === 'text') return t.text
+        if (t.kind === 'gif') return `<${t.id}>`
         const l = (x: { emote: { code: string }; modifiers: { code: string }[] }) => [x.emote.code, ...x.modifiers.map((m) => m.code)].join('+')
         return `[${[t, ...t.overlays].map(l).join(' / ')}]`
       })

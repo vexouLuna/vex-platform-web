@@ -1,6 +1,6 @@
 # vex-platform-web
 
-The web side of [vex-platform](https://github.com/vEXOULZ/vex-platform): a client and Vue components for the routes
+The web side of [vex-platform](https://github.com/vexouLuna/vex-platform): a client and Vue components for the routes
 every vex-platform app serves under `/api/v2` (job runs, their events and kinds, the audit log), plus the chat-line
 parsing and rendering that VOD chat replay and a bot's chat log share.
 
@@ -23,23 +23,23 @@ git config core.hooksPath .conventions/githooks   # once per clone: branch-name 
 ## Using it
 
 ```bash
-npm install github:vEXOULZ/vex-platform-web#v0.1.0
+npm install github:vexouLuna/vex-platform-web#v0.1.0
 ```
 
 Three entry points:
 
 | Import | What |
 |---|---|
-| `@vexoulz/platform-web` | `PlatformClient`, `ProblemError`/`errorText`, the v2 types, and pure helpers (`jobActions`, `stepStates`, `progressText`, `subjectOf`, `actorLabel`, `auditFilterQuery`, `timeAgo`, `bytes`, …) |
-| `@vexoulz/platform-web/chat` | `tokenize`, `EmoteSet`, `resolveBadges`, `twitchColor`, `chatName`, `toChatLine` (a bot's v2 log entry → a chat line) `loadChannelEmotes(twitchId)` (7TV, BTTV and FFZ, straight from the providers) and `twitchUserLookup(url)` (a chatter's public profile from doomtp-bot's `/api/v2/twitch/users`) |
-| `@vexoulz/platform-web/vue` | `createPlatformUi`, `usePoll`, `useCursorPages`, `useEventTail`, `useJobActions`, and the components below. Importing it loads `style.css` |
+| `@vex/platform-web` | `PlatformClient`, `ProblemError`/`errorText`, the v2 types, and pure helpers (`jobActions`, `stepStates`, `progressText`, `subjectOf`, `actorLabel`/`auditActor`, `auditFilterQuery`, `timeAgo`, `bytes`, …) |
+| `@vex/platform-web/chat` | `tokenize`, `EmoteSet`, `resolveBadges`, `twitchColor`, `chatName`, `toChatLine` (a bot's v2 log entry → a chat line) `loadChannelEmotes(twitchId)` (7TV, BTTV and FFZ, straight from the providers) and `twitchUserLookup(url)` (a chatter's public profile from doomtp-bot's `/api/v2/twitch/users`) |
+| `@vex/platform-web/vue` | `createPlatformUi`, `usePoll`, `useCursorPages`, `useEventTail`, `useJobActions`, and the components below. Importing it loads `style.css` |
 
 The first two have no framework dependency. `vue ^3.5` is an optional peer, needed only for `./vue`.
 
 ### Client
 
 ```ts
-import { PlatformClient } from '@vexoulz/platform-web'
+import { PlatformClient } from '@vex/platform-web'
 
 export const platform = new PlatformClient({
   base: '/api/v2',
@@ -61,7 +61,7 @@ and `errorText(e)` the message to show for anything caught.
 
 ```ts
 // main.ts
-import { createPlatformUi } from '@vexoulz/platform-web/vue'
+import { createPlatformUi } from '@vex/platform-web/vue'
 import { RouterLink } from 'vue-router'
 
 app.use(
@@ -79,9 +79,10 @@ app.use(
 |---|---|
 | `JobsBrowser` | State tabs, kind and subject filters (`v-model:filters`), the first page polled, older pages on demand |
 | `JobsTable` | The rows alone |
-| `JobDetail` | One run: summary, steps with pause-before toggles, progress, payload, the event log, and pause / resume / run one step / retry from a step / cancel |
+| `JobDetail` | One run: summary, steps with pause-before toggles, progress, payload, the event log, and pause / resume / run one step / cancel, and a retry of any finished run from a step, now or later, with its own pause steps |
 | `JobEventLog` | An event log (`role=log`) that follows new lines |
 | `AuditBrowser` | The audit with by / action / target / actor kind / outcome filters, optionally one `scope` |
+| `ActorRef` | Who did something: a user as `@login` (id on hover, copied on click), a job as a link, a key or the app by name. Only users get an @ |
 | `AuditTable` | The rows alone; `#actor` and `#scope` slots |
 | `ChatLine` | One chat line: badges, name colour, emotes (with zero-width stacking), rewards, removed messages and notices; `#before`/`#after` slots for a timestamp or extra columns |
 | `ChatEmote` | One emote, with its menu button |

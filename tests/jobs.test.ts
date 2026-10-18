@@ -52,7 +52,7 @@ describe('jobActions', () => {
       ['queued', true, false, false, true, true],
       ['running', true, false, false, true, true],
       ['paused', false, true, false, true, true],
-      ['succeeded', false, false, false, false, false],
+      ['succeeded', false, false, true, false, false],
       ['failed', false, false, true, false, false],
       ['cancelled', false, false, true, false, false],
     ])
@@ -122,7 +122,15 @@ describe('subjects and audit', () => {
 
   it('names actors', () => {
     const [user, key, system] = audit.items as AuditOut[]
-    expect([actorLabel(user!), actorLabel(key!), actorLabel(system!, 'archive')]).toEqual(['@vexoulz', 'key k7', 'archive'])
+    expect([actorLabel(user!), actorLabel(key!), actorLabel(system!, 'archive')]).toEqual(['@example', 'key k7', 'archive'])
+    // Only a user gets an @: a job's or the app's login (a kind name) is not one.
+    const a = (actor_kind: string, actor_id: string | null, actor_login: string | null) => ({ actor_kind, actor_id, actor_login, via: 'job' })
+    expect([actorLabel(a('job', '42', 'archive')), actorLabel(a('system', null, 'archive'), 'app'), actorLabel(a('user', '99', null))]).toEqual([
+      'job #42',
+      'app',
+      '99',
+    ])
+    expect([actorLabel(a('user', null, 'session')), actorLabel(a('user', null, null))]).toEqual(['admin', 'admin'])
   })
 
   it('shows what changed', () => {

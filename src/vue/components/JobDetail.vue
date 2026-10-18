@@ -2,6 +2,7 @@
 // One run: what it is, its steps (with pause gates), progress, payload, controls and log. Polls the run and follows
 // its events while it can still change.
 import { computed, ref, watch } from 'vue'
+import { auditActor } from '../../audit'
 import type { PlatformClient } from '../../client'
 import { duration, isActive, jobActions, progressRatio, progressText, runTime, scheduledFor, stepStates } from '../../jobs'
 import type { JobKindOut, JobOut } from '../../types'
@@ -9,6 +10,7 @@ import { usePlatformUi } from '../config'
 import { useEventTail } from '../useEventTail'
 import { useJobActions } from '../useJobActions'
 import { usePoll } from '../usePoll'
+import ActorRef from './ActorRef.vue'
 import JobEventLog from './JobEventLog.vue'
 import PlatformLink from './PlatformLink.vue'
 import RelatedJobs from './RelatedJobs.vue'
@@ -103,12 +105,30 @@ const useKindGates = () => run.update(props.id, { pause_before: null }, "Using t
 const togglePauseNext = (on: boolean) =>
   run.update(props.id, { pause_next: on }, on ? 'Will pause after this step' : "Won't pause after this step")
 
+// A retry: from a step (where it stopped; the first one for a succeeded run), now or later, with its own pause steps.
 const retryStep = ref('')
 watch(
-  () => job.value?.step,
-  (s) => (retryStep.value = s ?? ''),
+  () => [job.value?.step, job.value?.state],
+  () => (retryStep.value = (job.value?.state === 'succeeded' ? null : job.value?.step) ?? job.value?.steps[0] ?? ''),
   { immediate: true },
 )
+const RETRY_IN: [string, number][] = [['now', 0], ['in 15 min', 15], ['in 1 hour', 60], ['in 6 hours', 360], ['in 1 day', 1440]]
+const retryIn = ref(0) // minutes; -1: at the time in retryAt
+const retryAt = ref('') // <input type="datetime-local">: the viewer's local time
+const retryGates = ref<string[] | null>(null) // null: leave the run's pause steps as they are
+const retrySteps = computed(() => (job.value ? job.value.steps.slice(Math.max(0, job.value.steps.indexOf(retryStep.value))) : []))
+const retryGated = (step: string) => (retryGates.value ?? gates.value).includes(step)
+function toggleRetryGate(step: string, on: boolean) {
+  const now = retryGates.value ?? [...gates.value]
+  retryGates.value = on ? [...now, step] : now.filter((s) => s !== step)
+}
+function retry() {
+  const at =
+    retryIn.value === -1 ? (retryAt.value ? new Date(retryAt.value).toISOString() : null) : retryIn.value ? new Date(Date.now() + retryIn.value * 60_000).toISOString() : null
+  if (retryIn.value === -1 && !at) return ui.notify('Pick when to retry', 'error')
+  run.retry(props.id, retryStep.value || null, { at, ...(retryGates.value ? { pause_before: retryGates.value } : {}) })
+  retryGates.value = null
+}
 
 const dialog = ref<HTMLDialogElement | null>(null)
 function cancel() {
@@ -139,11 +159,23 @@ defineExpose({ refresh })
           <select v-model="retryStep" class="vxp-input vxp-mono" aria-label="Retry from step" :disabled="!!busy">
             <option v-for="s in job.steps" :key="s" :value="s">from {{ s }}</option>
           </select>
-          <button type="button" class="vxp-btn primary" :disabled="!!busy" :aria-busy="busy === 'retry'" @click="run.retry(id, retryStep || null)">Retry</button>
+          <select v-model.number="retryIn" class="vxp-input" aria-label="When to retry" :disabled="!!busy">
+            <option v-for="[label, min] in RETRY_IN" :key="min" :value="min">{{ label }}</option>
+            <option :value="-1">at a time…</option>
+          </select>
+          <input v-if="retryIn === -1" v-model="retryAt" type="datetime-local" class="vxp-input" aria-label="Retry at" :disabled="!!busy" />
+          <button type="button" class="vxp-btn primary" :disabled="!!busy" :aria-busy="busy === 'retry'" @click="retry">{{ retryIn ? 'Schedule retry' : 'Retry' }}</button>
         </template>
         <button v-if="actions?.cancel" type="button" class="vxp-btn danger" :disabled="!!busy" :aria-busy="busy === 'cancel'" @click="dialog?.showModal()">Cancel</button>
         <slot name="actions" :job="job" />
       </div>
+      <fieldset v-if="actions?.retry && retrySteps.length" class="retry-gates vxp-small">
+        <legend class="vxp-muted">The retry pauses before</legend>
+        <label v-for="s in retrySteps" :key="s" class="vxp-check">
+          <input type="checkbox" :checked="retryGated(s)" :disabled="!!busy" @change="toggleRetryGate(s, ($event.target as HTMLInputElement).checked)" />
+          <span class="vxp-mono">{{ s }}</span>
+        </label>
+      </fieldset>
 
       <div class="summary vxp-panel">
         <dl>
@@ -151,7 +183,7 @@ defineExpose({ refresh })
           <div><dt>Kind</dt><dd class="vxp-mono" :title="kindInfo?.description">{{ job.kind }}</dd></div>
           <div><dt>Subject</dt><dd><SubjectLink :subject="job.subject" /><slot name="subject" :job="job" /></dd></div>
           <div><dt>Attempts</dt><dd class="vxp-mono">{{ job.attempts }}<template v-if="kindInfo?.max_attempts"> / {{ kindInfo.max_attempts }}</template></dd></div>
-          <div v-if="!job.parent_id"><dt>Started by</dt><dd :title="`${job.actor.kind}${job.actor.id ? `:${job.actor.id}` : ''} via ${job.actor.via}`">{{ job.actor.login ? `@${job.actor.login}` : job.actor.kind === 'system' ? ui.appName : job.actor.kind }}</dd></div>
+          <div v-if="!job.parent_id"><dt>Started by</dt><dd><ActorRef :actor="auditActor(job.actor)" /></dd></div>
           <div><dt>Created</dt><dd :title="ui.stamp(job.created_at)">{{ ui.timeAgo(job.created_at) }}</dd></div>
           <div v-if="job.started_at"><dt>Started</dt><dd :title="ui.stamp(job.started_at)">{{ ui.timeAgo(job.started_at) }}</dd></div>
           <div v-if="job.finished_at"><dt>Finished</dt><dd :title="ui.stamp(job.finished_at)">{{ ui.timeAgo(job.finished_at) }}</dd></div>
@@ -244,6 +276,8 @@ defineExpose({ refresh })
 .sk { display: flex; flex-direction: column; gap: 12px; }
 .retry-load { margin-top: 8px; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.retry-gates { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: -8px 0 0; padding: 0; border: 0; }
+.retry-gates legend { float: left; margin-right: 6px; }
 .summary { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
 dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px 16px; margin: 0; }
 dt { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--vxp-muted); margin-bottom: 2px; }

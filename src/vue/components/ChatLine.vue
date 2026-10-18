@@ -1,6 +1,8 @@
 <script setup lang="ts">
-// One chat line as Twitch shows it: reward, badges, the coloured name, bits, then the text with its emotes. Notices
-// (subs, raids, redemptions, moderation) are the text alone, set off; removed messages are struck through with why.
+// One chat line as Twitch shows it: reward, badges, the coloured name, bits, then the text with its emotes and GIFs.
+// Notices (subs, raids, redemptions, moderation) are the text alone, set off; one with the user's own message (a resub's)
+// is its system line over a normal chat line. Highlighted, intro and effect messages are set off too, and a gigantified
+// emote is drawn large. Removed messages are struck through with why.
 // The `before` slot goes first on the line (a timestamp), the `after` slot last. With `userCards`, the name is a button
 // asking for the chatter's card (`UserCard`).
 import { twitchColor } from '../../chat/color'
@@ -29,12 +31,21 @@ const emit = defineEmits<{ emoteMenu: [token: EmoteToken, anchor: HTMLElement]; 
 
 const color = () => twitchColor(props.line.user, props.line.color, props.colors)
 const name = () => chatName(props.line.user, props.line.login, props.names)
+// Twitch draws the last emote of a gigantified message large.
+const giant = () => (props.line.messageType === 'power_ups_gigantified_emote' ? props.line.tokens.findLastIndex((t) => t.kind === 'emote') : -1)
+const big = (t: EmoteToken): EmoteToken => ({ ...t, image: { ...t.image, src: t.image.large, srcset: t.image.large } })
 </script>
 
 <template>
-  <div class="vxp-chat-line" :class="{ notice: line.kind === 'notice', removed: line.removed }" :data-notice="line.noticeType ?? undefined">
+  <div
+    class="vxp-chat-line"
+    :class="{ notice: line.kind === 'notice', said: !!line.system, removed: line.removed }"
+    :data-notice="line.noticeType ?? undefined"
+    :data-type="line.messageType ?? undefined"
+  >
     <slot name="before" />
-    <template v-if="line.kind === 'message'">
+    <span v-if="line.system" class="system">{{ line.system }}</span>
+    <template v-if="line.kind === 'message' || line.system">
       <span v-if="line.reward" class="tag"
         >{{ line.reward.title }}<template v-if="line.reward.cost"> · {{ line.reward.cost }}</template></span
       >
@@ -54,7 +65,14 @@ const name = () => chatName(props.line.user, props.line.login, props.names)
     </template>
     <span class="text" :class="{ me: line.action }" :style="line.action ? { color: color() } : undefined">
       <template v-for="(t, j) in line.tokens" :key="j">
-        <ChatEmote v-if="t.kind === 'emote'" :token="t" :enabled="emotes" :open="openToken === t" @menu="emit('emoteMenu', t, $event)" />
+        <span v-if="t.kind === 'emote' && j === giant()" class="giant"
+          ><ChatEmote :token="big(t)" :enabled="emotes" :open="openToken === t" @menu="emit('emoteMenu', t, $event)"
+        /></span>
+        <ChatEmote v-else-if="t.kind === 'emote'" :token="t" :enabled="emotes" :open="openToken === t" @menu="emit('emoteMenu', t, $event)" />
+        <picture v-else-if="t.kind === 'gif'" class="gif">
+          <source media="(prefers-reduced-motion: reduce)" :srcset="t.still" />
+          <img :src="t.src" :alt="t.title" :title="t.title" loading="lazy" />
+        </picture>
         <span v-else>{{ t.text }}</span>
       </template>
     </span>
@@ -84,6 +102,16 @@ const name = () => chatName(props.line.user, props.line.login, props.names)
   padding: 2px 8px; border-left: 2px solid var(--vxp-accent); background: color-mix(in srgb, var(--vxp-accent) 8%, transparent);
   color: var(--vxp-chat-muted);
 }
+.system { display: block; }
+.said .text { color: var(--vxp-chat-ink); }
+[data-type='channel_points_highlighted'], [data-type='user_intro'], [data-type='power_ups_message_effect'] {
+  padding: 2px 8px; border-radius: 4px; background: color-mix(in srgb, var(--vxp-accent) 22%, transparent);
+}
+[data-type='user_intro'] { border-left: 2px solid var(--vxp-accent); }
+.giant { display: inline-block; margin: 6px 0; }
+.giant :deep(.img), .giant :deep(.ghost) { height: 112px; }
+.gif { display: block; margin: 2px 0; }
+.gif img { max-width: 100%; max-height: 160px; border-radius: 4px; }
 .removed .text { text-decoration: line-through; opacity: 0.55; }
 .why { margin-left: 6px; font-size: 11px; font-style: italic; color: var(--vxp-chat-muted); }
 </style>

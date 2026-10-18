@@ -5,6 +5,6 @@ export default defineConfig({
   plugins: [HstVue()],
   setupFile: 'stories/setup.ts',
   storyMatch: ['stories/**/*.story.vue'],
-  theme: { title: '@vexoulz/platform-web' },
+  theme: { title: '@vex/platform-web' },
   vite: { server: { port: 6007 } },
 })

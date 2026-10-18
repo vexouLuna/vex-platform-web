@@ -4,7 +4,7 @@
       "id": 812, "kind": "upload", "subject": "vod:2551234567", "scope": null, "state": "running", "step": "upload",
       "steps": ["download", "transcode", "upload", "publish"], "payload": { "privacy": "unlisted" }, "attempts": 1,
       "last_error": null, "not_before": null, "pause_before": null, "pause_next": false, "cancel_requested": false,
-      "actor": { "kind": "user", "id": "41234567", "login": "vexoulz", "via": "session" },
+      "actor": { "kind": "user", "id": "41234567", "login": "example", "via": "session" },
       "created_at": "2026-09-30T18:00:00Z", "updated_at": "2026-09-30T18:42:10Z",
       "started_at": "2026-09-30T18:00:02Z", "finished_at": null
     },
