@@ -15,7 +15,7 @@ describe('batchTargets', () => {
     expect(batchTargets(runs, 'resume').map((j) => j.id)).toEqual([1])
     expect(batchTargets(runs, 'pause').map((j) => j.id)).toEqual([2, 3])
     expect(batchTargets(runs, 'cancel').map((j) => j.id)).toEqual([1, 2])
-    expect(batchTargets(runs, 'retry').map((j) => j.id)).toEqual([4])
+    expect(batchTargets(runs, 'retry').map((j) => j.id)).toEqual([4, 5])
   })
 })
 

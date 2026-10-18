@@ -41,8 +41,7 @@ export type BatchAction = 'pause' | 'resume' | 'retry' | 'cancel'
 
 /** The runs among `jobs` that `action` applies to in their state; sending it to the others would be a 409. */
 export function batchTargets<J extends Pick<JobOut, 'state' | 'cancel_requested'>>(jobs: readonly J[], action: BatchAction): J[] {
-  // A batch retry is for runs that didn't finish: re-running succeeded ones is a choice made one run at a time.
-  return jobs.filter((j) => jobActions(j)[action] && !(action === 'retry' && j.state === 'succeeded'))
+  return jobs.filter((j) => jobActions(j)[action])
 }
 
 /** Where a run is in its steps: 0-based index of the current step, and the total. */
