@@ -124,7 +124,8 @@ function gifOf(f: RawFragment): GifToken | null {
 /** Fragments as words, the gaps between them (original whitespace kept), emotes and GIFs. */
 function* parts(fragments: readonly RawFragment[], emotes?: EmoteSet | null): Generator<Part> {
   for (const f of fragments) {
-    const gif = f.type === 'gif' ? gifOf(f) : null
+    // doomtp-bot's fragments say `type: 'gif'`; the archive's replay-shaped ones only carry the `gif`.
+    const gif = f.gif ? gifOf(f) : null
     if (gif) {
       yield { kind: 'gif', gif }
       continue

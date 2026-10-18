@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import prod from './fixtures/log-chat-types.json'
-import { EmoteSet, loadBadges, loadChannelEmotes, pairRedemptions, toChatLine, type LogEntry, type LogMessage, type LogModeration, type LogNotification, type Token } from '../src/chat'
+import { EmoteSet, loadBadges, loadChannelEmotes, pairRedemptions, toChatLine, tokenize, type LogEntry, type LogMessage, type LogModeration, type LogNotification, type Token } from '../src/chat'
 
 const plain = (tokens: Token[]) => tokens.map((t) => (t.kind === 'text' ? t.text : t.kind === 'gif' ? `<${t.title}>` : `[${t.emote.code}]`)).join('')
 const user = { id: '1', login: 'someone', display_name: 'SomeOne' }
@@ -103,6 +103,8 @@ describe('chat types as prod logged them', () => {
     expect(toChatLine(message({ fragments: [elsewhere] })).tokens).toEqual([{ kind: 'text', text: '[x]' }])
     const bad = { type: 'gif', text: '[x]', gif: { id: '../x' } }
     expect(toChatLine(message({ fragments: [bad] })).tokens[0]!.kind).toBe('text')
+    // The archive's replay-shaped fragment has no `type`, only the gif.
+    expect(tokenize([{ text: '[Hi]', gif: { id: 'BsMaPK6JhnO89D3b6i' } }])[0]).toMatchObject({ kind: 'gif', title: 'Hi' })
   })
 
   it("shows a sub notice's message as a chat line under its system line", () => {
