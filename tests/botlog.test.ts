@@ -122,7 +122,7 @@ describe('chat types as prod logged them', () => {
   })
 
   it('folds a redemption into the message sent with it', () => {
-    const notice = entries.find((e) => e.kind === 'notification' && e.type === 'redemption')!
+    const notice = entries.find((e) => e.kind === 'notification' && e.type === 'redemption') as LogNotification
     // Prod had no reward with text input in the sample: this message is the one Twitch sends with such a reward.
     const sent = message({ id: 'm-r', at: '2026-10-11T20:00:03Z', user: notice.user, reward_id: '908a4677-6ea1-488c-b98c-d9cbaf47e55a' })
     const redeemed = { ...notice, at: '2026-10-11T20:00:01Z' }
