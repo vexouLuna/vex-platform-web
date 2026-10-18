@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import { EmoteSet, loadBadges, loadChannelEmotes, toChatLine, type LogMessage, type LogModeration, type LogNotification, type Token } from '../src/chat'
+import prod from './fixtures/log-chat-types.json'
+import { EmoteSet, loadBadges, loadChannelEmotes, pairRedemptions, toChatLine, type LogEntry, type LogMessage, type LogModeration, type LogNotification, type Token } from '../src/chat'
 
-const plain = (tokens: Token[]) => tokens.map((t) => (t.kind === 'text' ? t.text : `[${t.emote.code}]`)).join('')
+const plain = (tokens: Token[]) => tokens.map((t) => (t.kind === 'text' ? t.text : t.kind === 'gif' ? `<${t.title}>` : `[${t.emote.code}]`)).join('')
 const user = { id: '1', login: 'someone', display_name: 'SomeOne' }
 
 const message = (extra: Partial<LogMessage> = {}): LogMessage => ({
@@ -75,6 +76,62 @@ describe('toChatLine', () => {
     }
     const line = toChatLine(m)
     expect([line.id, line.noticeType, plain(line.tokens)]).toEqual(['mod-7', 'moderation.timeout', 'Mod timed out spammer for 600s: spam'])
+  })
+})
+
+describe('chat types as prod logged them', () => {
+  const entries = prod.entries as LogEntry[]
+  const byId = (prefix: string) => toChatLine(entries.find((e) => String(e.id).startsWith(prefix))!)
+
+  it('marks highlighted and gigantified messages with their type', () => {
+    expect(byId('f0898650').messageType).toBe('channel_points_highlighted')
+    const giant = byId('14f4d3ee')
+    expect([giant.messageType, plain(giant.tokens)]).toEqual(['power_ups_gigantified_emote', '[mathilGoose]'])
+    expect(toChatLine(message()).messageType).toBeNull()
+  })
+
+  it('reads a GIF as a GIPHY image, whatever URL the fragment names', () => {
+    const [gif] = byId('0ce2b7e5').tokens
+    expect(gif).toEqual({
+      kind: 'gif',
+      id: 'BsMaPK6JhnO89D3b6i',
+      src: 'https://media.giphy.com/media/BsMaPK6JhnO89D3b6i/giphy.gif',
+      still: 'https://media.giphy.com/media/BsMaPK6JhnO89D3b6i/giphy_s.gif',
+      title: 'Happy Lets Go GIF by TheJoeCoin',
+    })
+    const elsewhere = { type: 'gif', text: '[x]', gif: { url: 'https://evil.example/media/abc/giphy.gif' } }
+    expect(toChatLine(message({ fragments: [elsewhere] })).tokens).toEqual([{ kind: 'text', text: '[x]' }])
+    const bad = { type: 'gif', text: '[x]', gif: { id: '../x' } }
+    expect(toChatLine(message({ fragments: [bad] })).tokens[0]!.kind).toBe('text')
+  })
+
+  it("shows a sub notice's message as a chat line under its system line", () => {
+    const resub = byId('19b8ea67')
+    expect(resub.system).toBe("synthetiquee subscribed with Prime. They've subscribed for 3 months!")
+    expect([resub.kind, resub.user, resub.login, resub.color, plain(resub.tokens)]).toEqual(['notice', 'synthetiquee', 'synthetiquee', '#FF69B4', '[:)]'])
+    expect(plain(byId('ebbdefd0').tokens)).toContain('[moon2CUTE]')
+    expect(byId('e7521f39').system).toBeTruthy() // a modiversary with a message
+  })
+
+  it('keeps a notice with nothing said as one line', () => {
+    for (const id of ['3d211a20', '5a0468a1', '0c4cec2d']) {
+      const line = byId(id)
+      expect([line.system, line.tokens.length]).toEqual([null, 1])
+    }
+    expect(plain(byId('3d211a20').tokens)).toBe('SClENTlST subscribed with Prime.')
+  })
+
+  it('folds a redemption into the message sent with it', () => {
+    const notice = entries.find((e) => e.kind === 'notification' && e.type === 'redemption')!
+    // Prod had no reward with text input in the sample: this message is the one Twitch sends with such a reward.
+    const sent = message({ id: 'm-r', at: '2026-10-11T20:00:03Z', user: notice.user, reward_id: '908a4677-6ea1-488c-b98c-d9cbaf47e55a' })
+    const redeemed = { ...notice, at: '2026-10-11T20:00:01Z' }
+    const later = { ...sent, id: 'm-late', at: '2026-10-11T20:01:00Z' }
+    const out = pairRedemptions([redeemed, sent, later])
+    expect(out.map((e) => e.id)).toEqual(['m-r', 'm-late'])
+    expect(toChatLine(out[0]!).reward).toEqual({ title: 'laugh', cost: 1, input: null })
+    expect(toChatLine(out[1]!).reward?.title).toBe('Reward')
+    expect(pairRedemptions([notice])).toEqual([notice]) // no message: the notice stays
   })
 })
 
