@@ -1,6 +1,6 @@
 // What a site needs to show a job run: which actions apply, where it is in its steps, its progress.
 import { bytes } from './format'
-import type { EventOut, JobOut, JobState, Progress } from './types'
+import type { EventLevel, EventOut, JobOut, JobState, Progress } from './types'
 
 export type Tone = 'default' | 'accent' | 'ok' | 'warn' | 'bad'
 
@@ -146,4 +146,12 @@ export function jobTree(items: readonly JobOut[], rootId: number): TreeRow[] {
   if (root) walk(root, 0)
   else for (const c of children.get(rootId) ?? []) walk(c, 0)
   return rows
+}
+
+export const EVENT_LEVELS: readonly EventLevel[] = ['debug', 'info', 'warning', 'error']
+
+/** Whether an event is at `min` or above; an unknown level counts as info. */
+export function atLevel(e: EventOut, min: EventLevel): boolean {
+  const rank = (l: string) => Math.max(EVENT_LEVELS.indexOf(l as EventLevel), 1)
+  return rank(e.level) >= EVENT_LEVELS.indexOf(min)
 }

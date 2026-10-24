@@ -4,8 +4,8 @@
 import { computed, ref, watch } from 'vue'
 import { auditActor } from '../../audit'
 import type { PlatformClient } from '../../client'
-import { duration, isActive, jobActions, progressRatio, progressText, runTime, scheduledFor, stepStates } from '../../jobs'
-import type { JobKindOut, JobOut } from '../../types'
+import { EVENT_LEVELS, duration, isActive, jobActions, progressRatio, progressText, runTime, scheduledFor, stepStates } from '../../jobs'
+import type { EventLevel, JobKindOut, JobOut } from '../../types'
 import { usePlatformUi } from '../config'
 import { useEventTail } from '../useEventTail'
 import { useJobActions } from '../useJobActions'
@@ -46,9 +46,12 @@ const {
   },
   (): number => (stopped ? 0 : props.poll),
 )
+// The log's lowest level shown; debug lines (what a check found, what was skipped) only when asked for.
+const level = ref<EventLevel>('info')
 const tail = useEventTail(props.client, () => props.id, {
   poll: props.poll,
   live: () => !job.value || isActive(job.value.state),
+  minLevel: () => level.value,
 })
 watch(
   () => props.id,
@@ -244,11 +247,22 @@ defineExpose({ refresh })
         </section>
 
         <section>
-          <h2 class="vxp-eyebrow">Log</h2>
+          <div class="log-head">
+            <h2 class="vxp-eyebrow">Log</h2>
+            <label class="vxp-small">
+              Level
+              <select v-model="level" class="vxp-input" aria-label="Lowest log level shown">
+                <option v-for="l in EVENT_LEVELS" :key="l" :value="l">{{ l }}{{ l === 'error' ? '' : ' and up' }}</option>
+              </select>
+            </label>
+          </div>
           <JobEventLog
             :lines="tail.lines.value"
             :error="tail.error.value"
             :dropped="tail.dropped.value"
+            :has-older="tail.hasOlder.value"
+            :loading-older="tail.loadingOlder.value"
+            @older="tail.loadOlder"
             :empty="isActive(job.state) ? 'No log lines yet.' : 'This job wrote no log lines.'"
           />
         </section>
@@ -288,6 +302,8 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .cols { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 20px; }
 @container (max-width: 760px) { .cols { grid-template-columns: minmax(0, 1fr); } }
 h2 { margin: 0 0 8px; }
+.log-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
+.log-head label { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: var(--vxp-muted); }
 .steps { list-style: none; margin: 0 0 10px; padding: 6px 0; }
 .steps li { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; padding: 6px 12px; }
 .mark { width: 14px; text-align: center; }

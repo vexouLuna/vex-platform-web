@@ -1,7 +1,7 @@
 // Client for the routes every vex-platform app serves under /api/v2: job runs, their events and kinds, and the
 // audit log. Auth is the site's: a session cookie (writes carry its CSRF token) or a Bearer key.
 import { ProblemError } from './errors'
-import type { AuditOut, AuditQuery, EnqueueIn, EventOut, JobCountsOut, JobCountsQuery, JobKindOut, JobOut, JobQuery, JobUpdate, Page, RelatedOut } from './types'
+import type { AuditOut, AuditQuery, EnqueueIn, EventOut, EventPage, EventQuery, JobCountsOut, JobCountsQuery, JobKindOut, JobOut, JobQuery, JobUpdate, Page, RelatedOut } from './types'
 
 export type Fetch = (input: string, init?: RequestInit) => Promise<Response>
 
@@ -105,6 +105,10 @@ export class PlatformClient {
   /** Oldest first, after `cursor`. `next_cursor` is never null: pass it back to follow the log. */
   events(id: number, cursor?: string | null, limit?: number, signal?: AbortSignal): Promise<Page<EventOut> & { next_cursor: string }> {
     return this.request('GET', `/jobs/${id}/events${query({ cursor, limit })}`, undefined, signal)
+  }
+  /** A page of the run's events: after a cursor, before one, or the newest (`tail`); see `EventQuery`. */
+  eventPage(id: number, q: EventQuery = {}, signal?: AbortSignal): Promise<EventPage> {
+    return this.request('GET', `/jobs/${id}/events${query({ ...q })}`, undefined, signal)
   }
   /** The tree of runs this one is in: who queued whom (vex-platform 0.6+). */
   related(id: number, limit?: number, signal?: AbortSignal): Promise<RelatedOut> {
