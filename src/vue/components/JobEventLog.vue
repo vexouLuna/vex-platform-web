@@ -42,7 +42,7 @@ const time = (iso: string) => new Date(iso).toLocaleTimeString()
     <p v-else-if="!lines.length" class="vxp-muted">{{ empty }}</p>
     <p v-if="hasOlder" class="older">
       <button type="button" class="vxp-btn" :disabled="loadingOlder" @click="emit('older')">
-        {{ loadingOlder ? 'Loading older lines…' : 'Load older lines' }}
+        {{ loadingOlder ? 'Loading older linesâ€¦' : 'Load older lines' }}
       </button>
     </p>
     <p v-else-if="dropped" class="vxp-muted">{{ dropped }} older lines not shown.</p>
