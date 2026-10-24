@@ -60,13 +60,34 @@ export interface Progress {
   unit: ProgressUnit
 }
 
+export type EventLevel = 'debug' | 'info' | 'warning' | 'error'
+
 export interface EventOut {
   id: number
   at: string
-  level: 'debug' | 'info' | 'warning' | 'error' | (string & {})
+  level: EventLevel | (string & {})
   step: string | null
   message: string
   progress: Progress | null
+}
+
+export interface EventQuery {
+  /** Events after this cursor (a `next_cursor`), oldest first. */
+  cursor?: string | null
+  /** The page just before this `prev_cursor` (vex-platform 0.9+). */
+  before?: string | null
+  /** The run's newest page (vex-platform 0.9+). */
+  tail?: boolean
+  /** Leave out events below this level (vex-platform 0.9+). */
+  min_level?: EventLevel
+  limit?: number
+}
+
+export interface EventPage extends Page<EventOut> {
+  /** Never null: pass it back as `cursor` to follow the log. */
+  next_cursor: string
+  /** With `before` or `tail`: pass it back as `before` for older events; null (or absent) when there are none. */
+  prev_cursor?: string | null
 }
 
 export interface JobKindOut {
