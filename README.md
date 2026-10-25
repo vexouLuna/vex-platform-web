@@ -57,6 +57,37 @@ Errors are `ProblemError`s parsed from RFC 9457 problem+json (`status`, `code`, 
 from Retry-After as delay-seconds or an HTTP date; `retryAfterText()` gives "Try again in 5 min." for a login page,
 and `errorText(e)` the message to show for anything caught.
 
+### Admin session
+
+`useAdminSession` keeps a site's sign-in state without its chrome: asked once (`ensure()`, for the router guard),
+the CSRF token handed to the site's client, a 401 dropping it with a notice and calling the site's expired handler.
+The app's own answer is `data` (twitch-archive and doomtp-bot shape it differently).
+
+```ts
+import { signInTarget, safeNext } from '@vex/platform-web'
+import { useAdminSession, jobFiltersFrom, jobFiltersQuery } from '@vex/platform-web/vue'
+
+export const session = useAdminSession<Session>({
+  auth,                                   // the site's client: { csrf, onUnauthorized }
+  load: () => admin.session(),
+  logout: () => admin.logout(),
+  signedOut: (s) => ({ ...s, authenticated: false, csrf: null, user: null }),
+})
+session.signIn(await admin.login(password))
+
+router.beforeEach(async (to) => {
+  await session.ensure()
+  const go = signInTarget({ authenticated: session.authenticated.value, twitchLogin, notice: session.notice.value }, to.fullPath, twitchLoginUrl)
+  if (!go) return true
+  if ('href' in go) return (location.assign(go.href), false)
+  return { path: '/admin/login', query: { next: go.next } }
+})
+// The sign-in page: router.replace(safeNext(route.query.next, { home: '/manage', not: ['/admin/login'] }))
+```
+
+`jobFiltersFrom(route.query)` / `jobFiltersQuery(f)` and `auditFiltersFrom` / `auditFiltersQuery` put the browsers'
+`v-model:filters` in the URL.
+
 ### Components
 
 ```ts
@@ -81,6 +112,9 @@ app.use(
 | `JobsTable` | The rows alone |
 | `JobDetail` | One run: summary, steps with pause-before toggles, progress, payload, the event log, and pause / resume / run one step / cancel, and a retry of any finished run from a step, now or later, with its own pause steps |
 | `JobEventLog` | An event log (`role=log`) that follows new lines |
+| `StartJob` | The "Start a job" dialog (`v-model:open`): kind, subject, start step, pause steps, paused, JSON payload; `@started` gets the new run. `to-subject` maps what's typed (a VOD id) to the subject, `#error="{ error, subject }"` words a refusal the site knows |
+| `PauseGates` | The "Pause before" step picker: `v-model` the steps, `steps` the ones shown (others in the model are kept) |
+| `LoadState` | Error with "Try again", skeleton rows, or the empty state, else its content. The same props as vex-ui's `VxLoadState` |
 | `AuditBrowser` | The audit with by / action / target / actor kind / outcome filters, optionally one `scope` |
 | `ActorRef` | Who did something: a user as `@login` (id on hover, copied on click), a job as a link, a key or the app by name. Only users get an @ |
 | `AuditTable` | The rows alone; `#actor` and `#scope` slots |

@@ -1,0 +1,13 @@
+{
+  "authenticated": true,
+  "csrf": "9a1c47be03d2f6aa",
+  "expires_at": 1793001120000,
+  "admin_enabled": false,
+  "role": "moderator",
+  "user": { "id": "40424907", "login": "vexoulz" },
+  "channels": ["keeki_dechu"],
+  "twitch_login": true,
+  "channel_roles": { "keeki_dechu": "moderator" },
+  "channel_ranks": { "keeki_dechu": 3 },
+  "own_channel": { "login": "vexoulz", "joined": true, "status": "joined", "tier": "full" }
+}
