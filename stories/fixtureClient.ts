@@ -72,7 +72,25 @@ export function fixtureClient(): PlatformClient {
         for (const j of [...rows].sort((a, b) => a.id - b.id)) if (j.parent_id && tree.has(j.parent_id)) tree.add(j.id)
         return json({ root_id: root.id, items: rows.filter((j) => tree.has(j.id)).sort((a, b) => a.id - b.id), truncated: false })
       }
-      if (m[2] === 'events') return json(url.searchParams.has('cursor') ? { items: [], next_cursor: 'end' } : { ...events, next_cursor: 'end' })
+      if (m[2] === 'events') {
+        // The fixture's lines are the newest page; `before` gives an older page of made-up lines, debug ones among them.
+        const ranks = ['debug', 'info', 'warning', 'error']
+        const min = ranks.indexOf(url.searchParams.get('min_level') ?? 'debug')
+        const shown = (items: typeof events.items) => items.filter((e) => ranks.indexOf(e.level) >= min)
+        if (url.searchParams.has('cursor')) return json({ items: [], next_cursor: 'end' })
+        if (url.searchParams.has('before')) {
+          const older = Array.from({ length: 40 }, (_, i) => ({
+            id: -40 + i,
+            at: new Date(Date.parse(events.items[0]!.at) - (40 - i) * 1000).toISOString(),
+            level: i % 3 ? 'info' : 'debug',
+            step: 'chapters',
+            message: i % 3 ? `chapter ${i}: Just Chatting at ${i * 7}m` : `censor: category ${i} not in the censored list, skipped`,
+            progress: null,
+          }))
+          return json({ items: shown(older), next_cursor: 'end', prev_cursor: null })
+        }
+        return json({ items: shown(events.items), next_cursor: 'end', prev_cursor: 'older' })
+      }
       if (m[2] && after[m[2]]) job.state = after[m[2]]!
       if (init?.method === 'PATCH') Object.assign(job, JSON.parse(String(init.body)))
       if (m[2] === 'retry') {
