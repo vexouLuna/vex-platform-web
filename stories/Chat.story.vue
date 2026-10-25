@@ -26,6 +26,11 @@ const lines = [
 ].map((raw) => toChatLine(raw, emotes))
 // Real entries from prod (tests/fixtures/log-chat-types.json): highlighted, gigantified, a GIF, sub notices, a redemption.
 const types = pairRedemptions(prod.entries as LogEntry[]).map((e) => toChatLine(e))
+const gifs = types.filter((l) => l.tokens.some((t) => t.kind === 'gif'))
+// The same GIF from a host that doesn't answer (blocked or offline), so its image fails. GIPHY itself answers an id it
+// doesn't have with a placeholder image.
+const nowhere = 'https://giphy.invalid/missing.gif'
+const broken = gifs.map((l) => ({ ...l, id: `${l.id}-broken`, tokens: l.tokens.map((t) => (t.kind === 'gif' ? { ...t, src: nowhere, still: nowhere } : t)) }))
 </script>
 
 <template>
@@ -40,6 +45,13 @@ const types = pairRedemptions(prod.entries as LogEntry[]).map((e) => toChatLine(
     <Variant title="Message and notice types">
       <div class="vxp story-frame chat">
         <ChatLine v-for="l in types" :key="l.id" :line="l" />
+      </div>
+    </Variant>
+    <Variant title="GIFs off, or not loading">
+      <div class="vxp story-frame chat">
+        <p class="vxp-muted vxp-small">With <code>:gifs="false"</code>, then a GIF whose image fails to load.</p>
+        <ChatLine v-for="l in gifs" :key="l.id" :line="l" :gifs="false" />
+        <ChatLine v-for="l in broken" :key="l.id" :line="l" />
       </div>
     </Variant>
     <Variant title="User cards">

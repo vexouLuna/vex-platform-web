@@ -2,11 +2,13 @@
 // One chat line as Twitch shows it: reward, badges, the coloured name, bits, then the text with its emotes and GIFs.
 // Notices (subs, raids, redemptions, moderation) are the text alone, set off; one with the user's own message (a resub's)
 // is its system line over a normal chat line. Highlighted, intro and effect messages are set off too, and a gigantified
-// emote is drawn large. Removed messages are struck through with why.
+// emote is drawn large. Removed messages are struck through with why. A GIF that won't load, or any with `gifs` off,
+// shows its text.
 // The `before` slot goes first on the line (a timestamp), the `after` slot last. With `userCards`, the name is a button
 // asking for the chatter's card (`UserCard`).
+import { ref } from 'vue'
 import { twitchColor } from '../../chat/color'
-import { chatName, removalNote, type ChatLine, type EmoteToken, type NameMode } from '../../chat/message'
+import { chatName, removalNote, type ChatLine, type EmoteToken, type GifToken, type NameMode } from '../../chat/message'
 import ChatEmote from './ChatEmote.vue'
 
 const props = withDefaults(
@@ -18,6 +20,8 @@ const props = withDefaults(
     names?: NameMode
     /** Emote providers shown as images (missing ones are on). */
     emotes?: Partial<Record<'7tv' | 'bttv' | 'ffz', boolean>>
+    /** GIPHY GIFs as images; off shows their text (`[Cat GIF by ViralHog]`) and loads nothing from giphy.com. */
+    gifs?: boolean
     /** The emote whose menu is open, for its `aria-expanded`. */
     openToken?: EmoteToken | null
     /** Make the name a button that emits `user`. */
@@ -25,7 +29,7 @@ const props = withDefaults(
     /** This line's user card is open, for the name's `aria-expanded`. */
     userOpen?: boolean
   }>(),
-  { badges: true, colors: 'readable', names: 'display', emotes: () => ({}), openToken: null, userCards: false, userOpen: false },
+  { badges: true, colors: 'readable', names: 'display', emotes: () => ({}), gifs: true, openToken: null, userCards: false, userOpen: false },
 )
 const emit = defineEmits<{ emoteMenu: [token: EmoteToken, anchor: HTMLElement]; user: [line: ChatLine, anchor: HTMLElement] }>()
 
@@ -33,6 +37,8 @@ const color = () => twitchColor(props.line.user, props.line.color, props.colors)
 const name = () => chatName(props.line.user, props.line.login, props.names)
 // Twitch draws the last emote of a gigantified message large.
 const giant = () => (props.line.messageType === 'power_ups_gigantified_emote' ? props.line.tokens.findLastIndex((t) => t.kind === 'emote') : -1)
+// GIFs that didn't load (gone from GIPHY, blocked) show their text instead.
+const failed = ref<GifToken[]>([])
 const big = (t: EmoteToken): EmoteToken => ({ ...t, image: { ...t.image, src: t.image.large, srcset: t.image.large } })
 </script>
 
@@ -69,10 +75,11 @@ const big = (t: EmoteToken): EmoteToken => ({ ...t, image: { ...t.image, src: t.
           ><ChatEmote :token="big(t)" :enabled="emotes" :open="openToken === t" @menu="emit('emoteMenu', t, $event)"
         /></span>
         <ChatEmote v-else-if="t.kind === 'emote'" :token="t" :enabled="emotes" :open="openToken === t" @menu="emit('emoteMenu', t, $event)" />
-        <picture v-else-if="t.kind === 'gif'" class="gif">
+        <picture v-else-if="t.kind === 'gif' && gifs && !failed.includes(t)" class="gif">
           <source media="(prefers-reduced-motion: reduce)" :srcset="t.still" />
-          <img :src="t.src" :alt="t.title" :title="t.title" loading="lazy" />
+          <img :src="t.src" :alt="t.title" :title="t.title" loading="lazy" @error="failed.push(t)" />
         </picture>
+        <span v-else-if="t.kind === 'gif'">[{{ t.title }}]</span>
         <span v-else>{{ t.text }}</span>
       </template>
     </span>

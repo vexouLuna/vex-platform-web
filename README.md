@@ -84,7 +84,7 @@ app.use(
 | `AuditBrowser` | The audit with by / action / target / actor kind / outcome filters, optionally one `scope` |
 | `ActorRef` | Who did something: a user as `@login` (id on hover, copied on click), a job as a link, a key or the app by name. Only users get an @ |
 | `AuditTable` | The rows alone; `#actor` and `#scope` slots |
-| `ChatLine` | One chat line: badges, name colour, emotes (with zero-width stacking), rewards, removed messages and notices; `#before`/`#after` slots for a timestamp or extra columns |
+| `ChatLine` | One chat line: badges, name colour, emotes (with zero-width stacking), GIPHY GIFs (`:gifs="false"` shows their text and loads nothing from giphy.com; one that fails to load shows its text too), rewards, removed messages and notices; `#before`/`#after` slots for a timestamp or extra columns |
 | `ChatEmote` | One emote, with its menu button |
 | `UserCard` | The card a name opens (`ChatLine` with `user-cards`, `@user`): picture, id, account age, followers, roles, bio and a Twitch link; `#actions` for the site's own buttons. The profile comes from `createPlatformUi({ userLookup: twitchUserLookup(url) })`; without one the card shows what the chat line knows |
 

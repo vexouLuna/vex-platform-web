@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
 import prod from './fixtures/log-chat-types.json'
 import { EmoteSet, loadBadges, loadChannelEmotes, pairRedemptions, toChatLine, tokenize, type LogEntry, type LogMessage, type LogModeration, type LogNotification, type Token } from '../src/chat'
+import { ChatLine } from '../src/vue'
 
 const plain = (tokens: Token[]) => tokens.map((t) => (t.kind === 'text' ? t.text : t.kind === 'gif' ? `<${t.title}>` : `[${t.emote.code}]`)).join('')
 const user = { id: '1', login: 'someone', display_name: 'SomeOne' }
@@ -172,5 +174,28 @@ describe('loadBadges', () => {
     expect(await loadBadges('/api/v2/channels/doomtp/badges', { fetch })).toEqual(badges)
     expect(fetch.mock.calls[0]![0]).toBe('/api/v2/channels/doomtp/badges')
     expect(await loadBadges('/x', { fetch: vi.fn(async () => new Response('', { status: 503 })) })).toBeNull()
+  })
+})
+
+describe('ChatLine GIFs', () => {
+  const gifLine = () => toChatLine((prod.entries as LogEntry[]).find((e) => e.kind === 'message' && e.fragments?.some((f) => f.type === 'gif'))!)
+
+  it('shows the GIF from GIPHY, lazy, with its title as the alt text', () => {
+    const img = mount(ChatLine, { props: { line: gifLine() } }).find('.gif img')
+    expect(img.attributes()).toMatchObject({
+      src: 'https://media.giphy.com/media/BsMaPK6JhnO89D3b6i/giphy.gif',
+      alt: 'Happy Lets Go GIF by TheJoeCoin',
+      loading: 'lazy',
+    })
+  })
+
+  it("shows the text instead with gifs off, or when the image doesn't load", async () => {
+    const off = mount(ChatLine, { props: { line: gifLine(), gifs: false } })
+    expect(off.find('img').exists()).toBe(false)
+    expect(off.find('.text').text()).toBe('[Happy Lets Go GIF by TheJoeCoin]')
+    const on = mount(ChatLine, { props: { line: gifLine() } })
+    await on.find('.gif img').trigger('error')
+    expect(on.find('.gif').exists()).toBe(false)
+    expect(on.find('.text').text()).toBe('[Happy Lets Go GIF by TheJoeCoin]')
   })
 })
