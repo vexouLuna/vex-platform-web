@@ -1,6 +1,6 @@
 {
   "name": "@vex/platform-web",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "private": true,
   "type": "module",
   "description": "Web side of vex-platform: a client for its /api/v2 jobs and audit, Vue components for them, and Twitch chat rendering (emotes, badges, colours)",
