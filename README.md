@@ -81,6 +81,9 @@ app.use(
 | `JobsTable` | The rows alone |
 | `JobDetail` | One run: summary, steps with pause-before toggles, progress, payload, the event log, and pause / resume / run one step / cancel, and a retry of any finished run from a step, now or later, with its own pause steps |
 | `JobEventLog` | An event log (`role=log`) that follows new lines |
+| `StartJob` | The "Start a job" dialog (`v-model:open`): kind, subject, start step, pause steps, paused, JSON payload; `@started` gets the new run. `to-subject` maps what's typed (a VOD id) to the subject, `#error="{ error, subject }"` words a refusal the site knows |
+| `PauseGates` | The "Pause before" step picker: `v-model` the steps, `steps` the ones shown (others in the model are kept) |
+| `LoadState` | Error with "Try again", skeleton rows, or the empty state, else its content. The same props as vex-ui's `VxLoadState` |
 | `AuditBrowser` | The audit with by / action / target / actor kind / outcome filters, optionally one `scope` |
 | `ActorRef` | Who did something: a user as `@login` (id on hover, copied on click), a job as a link, a key or the app by name. Only users get an @ |
 | `AuditTable` | The rows alone; `#actor` and `#scope` slots |
