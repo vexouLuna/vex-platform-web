@@ -5,6 +5,7 @@ import audit from '../tests/fixtures/audit.json'
 import events from '../tests/fixtures/events.json'
 import kinds from '../tests/fixtures/job-kinds.json'
 import jobs from '../tests/fixtures/jobs.json'
+import vodNotFound from '../tests/fixtures/problem-vod-not-found.json'
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -52,6 +53,15 @@ export function fixtureClient(): PlatformClient {
       await new Promise((r) => setTimeout(r, 250))
       if (path === '/job-kinds') return json(kinds)
       if (path === '/audit') return json(audit)
+      if (path === '/jobs' && init?.method === 'POST') {
+        // A new run, queued; the archive's refusal for a subject it doesn't have (any id ending in 404).
+        const body = JSON.parse(String(init.body))
+        if (String(body.subject ?? '').endsWith('404')) return json(vodNotFound, 404)
+        const steps = kinds.find((k) => k.name === body.kind)?.steps ?? []
+        const job: JobOut = { ...backfill, id: 900 + rows.length, steps, step: body.step ?? steps[0] ?? null, state: body.paused ? 'paused' : 'queued', kind: body.kind, subject: body.subject ?? null, pause_before: body.pause_before ?? null, last_error: null, attempts: 0, parent_id: null, finished_at: null }
+        rows.push(job)
+        return json(job, 201)
+      }
       if (path === '/jobs') {
         const states = url.searchParams.getAll('state')
         const subject = url.searchParams.get('subject')

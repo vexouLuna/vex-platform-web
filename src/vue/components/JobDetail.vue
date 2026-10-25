@@ -12,6 +12,7 @@ import { useJobActions } from '../useJobActions'
 import { usePoll } from '../usePoll'
 import ActorRef from './ActorRef.vue'
 import JobEventLog from './JobEventLog.vue'
+import PauseGates from './PauseGates.vue'
 import PlatformLink from './PlatformLink.vue'
 import RelatedJobs from './RelatedJobs.vue'
 import StateChip from './StateChip.vue'
@@ -120,11 +121,6 @@ const retryIn = ref(0) // minutes; -1: at the time in retryAt
 const retryAt = ref('') // <input type="datetime-local">: the viewer's local time
 const retryGates = ref<string[] | null>(null) // null: leave the run's pause steps as they are
 const retrySteps = computed(() => (job.value ? job.value.steps.slice(Math.max(0, job.value.steps.indexOf(retryStep.value))) : []))
-const retryGated = (step: string) => (retryGates.value ?? gates.value).includes(step)
-function toggleRetryGate(step: string, on: boolean) {
-  const now = retryGates.value ?? [...gates.value]
-  retryGates.value = on ? [...now, step] : now.filter((s) => s !== step)
-}
 function retry() {
   const at =
     retryIn.value === -1 ? (retryAt.value ? new Date(retryAt.value).toISOString() : null) : retryIn.value ? new Date(Date.now() + retryIn.value * 60_000).toISOString() : null
@@ -172,13 +168,15 @@ defineExpose({ refresh })
         <button v-if="actions?.cancel" type="button" class="vxp-btn danger" :disabled="!!busy" :aria-busy="busy === 'cancel'" @click="dialog?.showModal()">Cancel</button>
         <slot name="actions" :job="job" />
       </div>
-      <fieldset v-if="actions?.retry && retrySteps.length" class="retry-gates vxp-small">
-        <legend class="vxp-muted">The retry pauses before</legend>
-        <label v-for="s in retrySteps" :key="s" class="vxp-check">
-          <input type="checkbox" :checked="retryGated(s)" :disabled="!!busy" @change="toggleRetryGate(s, ($event.target as HTMLInputElement).checked)" />
-          <span class="vxp-mono">{{ s }}</span>
-        </label>
-      </fieldset>
+      <PauseGates
+        v-if="actions?.retry"
+        :model-value="retryGates ?? gates"
+        :steps="retrySteps"
+        :disabled="!!busy"
+        legend="The retry pauses before"
+        class="retry-gates vxp-small"
+        @update:model-value="retryGates = $event"
+      />
 
       <div class="summary vxp-panel">
         <dl>
@@ -290,8 +288,8 @@ defineExpose({ refresh })
 .sk { display: flex; flex-direction: column; gap: 12px; }
 .retry-load { margin-top: 8px; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.retry-gates { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: -8px 0 0; padding: 0; border: 0; }
-.retry-gates legend { float: left; margin-right: 6px; }
+.retry-gates { margin-top: -8px; }
+.retry-gates :deep(legend) { float: left; margin: 0 6px 0 0; font-size: inherit; }
 .summary { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
 dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px 16px; margin: 0; }
 dt { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--vxp-muted); margin-bottom: 2px; }

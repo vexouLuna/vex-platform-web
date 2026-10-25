@@ -155,3 +155,26 @@ export function atLevel(e: EventOut, min: EventLevel): boolean {
   const rank = (l: string) => Math.max(EVENT_LEVELS.indexOf(l as EventLevel), 1)
   return rank(e.level) >= EVENT_LEVELS.indexOf(min)
 }
+
+/** `gates` with `step` turned on or off, the others left as they are (and in their order). */
+export function toggleGate(gates: readonly string[], step: string, on: boolean): string[] {
+  if (!on) return gates.filter((s) => s !== step)
+  return gates.includes(step) ? [...gates] : [...gates, step]
+}
+
+/** Whether two sets of pause steps are the same, whatever their order. */
+export const sameGates = (a: readonly string[], b: readonly string[]): boolean => [...a].sort().join() === [...b].sort().join()
+
+/**
+ * A job's optional JSON payload as typed: `{}`-shaped or nothing. `error` says what's wrong with it; `payload` is
+ * undefined for an empty field.
+ */
+export function parsePayload(text: string): { payload?: Record<string, unknown>; error: string | null } {
+  if (!text.trim()) return { error: null }
+  try {
+    const v: unknown = JSON.parse(text)
+    return v && typeof v === 'object' && !Array.isArray(v) ? { payload: v as Record<string, unknown>, error: null } : { error: 'Must be a JSON object.' }
+  } catch {
+    return { error: 'Not valid JSON.' }
+  }
+}
