@@ -8,6 +8,8 @@ export { useCursorPages, mergePages, type CursorPagesOptions } from './useCursor
 export { useEventTail, type EventTailOptions } from './useEventTail'
 export { useJobActions, type JobAction } from './useJobActions'
 export { useJobBatch, type BatchResult } from './useJobBatch'
+export { useAdminSession, type AdminSession, type AdminSessionOptions, type SessionAuth, type SessionShape } from './useAdminSession'
+export { jobFiltersFrom, jobFiltersQuery, auditFiltersFrom, auditFiltersQuery } from './filters'
 
 export { default as PlatformLink } from './components/PlatformLink.vue'
 export { default as StateChip } from './components/StateChip.vue'

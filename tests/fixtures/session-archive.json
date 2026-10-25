@@ -1,0 +1,8 @@
+{
+  "authenticated": true,
+  "csrf": "c5f0d1e2a9b84f7e",
+  "expiresAt": "2026-10-26T04:12:00Z",
+  "passwordLogin": false,
+  "twitchLogin": true,
+  "user": { "id": "40424907", "login": "vexoulz", "displayName": "vEXOULZ", "avatar": null, "color": "#8A2BE2" }
+}
