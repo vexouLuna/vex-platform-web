@@ -57,6 +57,37 @@ Errors are `ProblemError`s parsed from RFC 9457 problem+json (`status`, `code`, 
 from Retry-After as delay-seconds or an HTTP date; `retryAfterText()` gives "Try again in 5 min." for a login page,
 and `errorText(e)` the message to show for anything caught.
 
+### Admin session
+
+`useAdminSession` keeps a site's sign-in state without its chrome: asked once (`ensure()`, for the router guard),
+the CSRF token handed to the site's client, a 401 dropping it with a notice and calling the site's expired handler.
+The app's own answer is `data` (twitch-archive and doomtp-bot shape it differently).
+
+```ts
+import { signInTarget, safeNext } from '@vex/platform-web'
+import { useAdminSession, jobFiltersFrom, jobFiltersQuery } from '@vex/platform-web/vue'
+
+export const session = useAdminSession<Session>({
+  auth,                                   // the site's client: { csrf, onUnauthorized }
+  load: () => admin.session(),
+  logout: () => admin.logout(),
+  signedOut: (s) => ({ ...s, authenticated: false, csrf: null, user: null }),
+})
+session.signIn(await admin.login(password))
+
+router.beforeEach(async (to) => {
+  await session.ensure()
+  const go = signInTarget({ authenticated: session.authenticated.value, twitchLogin, notice: session.notice.value }, to.fullPath, twitchLoginUrl)
+  if (!go) return true
+  if ('href' in go) return (location.assign(go.href), false)
+  return { path: '/admin/login', query: { next: go.next } }
+})
+// The sign-in page: router.replace(safeNext(route.query.next, { home: '/manage', not: ['/admin/login'] }))
+```
+
+`jobFiltersFrom(route.query)` / `jobFiltersQuery(f)` and `auditFiltersFrom` / `auditFiltersQuery` put the browsers'
+`v-model:filters` in the URL.
+
 ### Components
 
 ```ts
