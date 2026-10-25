@@ -1,5 +1,13 @@
 # @vex/platform-web
 
+## 0.13.0
+
+### Minor Changes
+
+- 977bd7a: `useAdminSession` (a headless admin session: asked once, CSRF handed to the site's client, dropped on a 401), `signInTarget` and `safeNext` for the sign-in redirect, and `jobFiltersFrom`/`jobFiltersQuery`/`auditFiltersFrom`/`auditFiltersQuery` for the browsers' filters in the URL.
+- 476c6a4: `ChatLine` takes `gifs` (default on): off shows a GIF's text (`[Cat GIF by ViralHog]`) and loads nothing from giphy.com. A GIF whose image fails to load shows its text too.
+- bb74b8d: `StartJob` (the "Start a job" dialog), `PauseGates` (the "Pause before" step picker, now also JobDetail's retry gates) and `LoadState` (error with Try again, skeletons, empty; vex-ui's `VxLoadState` props on `--vxp-*`), plus `toggleGate`, `sameGates` and `parsePayload`.
+
 ## 0.12.0
 
 ### Minor Changes
