@@ -13,9 +13,10 @@
   --vxp-hover: rgb(0 0 0 / 0.05);
   --vxp-accent: #3b5bdb;
   --vxp-on-accent: #ffffff;
-  --vxp-ok: #2f9e44;
-  --vxp-warn: #b7791f;
+  --vxp-ok: #1f7a33;
+  --vxp-warn: #8a5a00;
   --vxp-bad: #e03131;
+  --vxp-on-bad: #ffffff;
   --vxp-ring: var(--vxp-accent);
   --vxp-radius: 8px;
   --vxp-radius-sm: 5px;
@@ -42,6 +43,7 @@
     --vxp-ok: #8fd694;
     --vxp-warn: #e8c35a;
     --vxp-bad: #ff6b5e;
+    --vxp-on-bad: #0c0c0f;
   }
 }
 
@@ -67,14 +69,20 @@
 .vxp-btn.primary { background: var(--vxp-accent); border-color: var(--vxp-accent); color: var(--vxp-on-accent); }
 .vxp-btn.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--vxp-accent) 85%, var(--vxp-ink)); }
 .vxp-btn.danger { color: var(--vxp-bad); border-color: color-mix(in srgb, var(--vxp-bad) 50%, var(--vxp-line)); }
-.vxp-btn.danger-solid { background: var(--vxp-bad); border-color: var(--vxp-bad); color: #fff; }
+.vxp-btn.danger-solid { background: var(--vxp-bad); border-color: var(--vxp-bad); color: var(--vxp-on-bad); }
 
 .vxp-input {
   height: var(--vxp-ctl); padding: 0 10px; min-width: 0; font: inherit; font-size: 13px; color: var(--vxp-ink);
   background: var(--vxp-bg); border: 1px solid var(--vxp-line); border-radius: var(--vxp-radius-sm);
 }
 select.vxp-input { padding-right: 4px; }
+.vxp-input:hover:not(:disabled) { border-color: var(--vxp-muted); }
+.vxp-input:disabled { opacity: 0.5; cursor: not-allowed; background: var(--vxp-surface); }
+.vxp-input[aria-invalid='true'], .vxp-input.is-invalid { border-color: var(--vxp-bad); }
+.vxp-input[aria-invalid='true']:focus-visible, .vxp-input.is-invalid:focus-visible { outline-color: var(--vxp-bad); }
 .vxp-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--vxp-muted); }
+/* The line under a field that failed validation; render it only while there is a message (role=alert). */
+.vxp-field-error { font-size: 12px; color: var(--vxp-bad); }
 .vxp-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
 .vxp-check input { accent-color: var(--vxp-accent); margin: 0; }
 
@@ -126,4 +134,5 @@ dialog.vxp-dialog .actions { display: flex; justify-content: flex-end; flex-wrap
 
 @media (prefers-reduced-motion: reduce) {
   .vxp-skeleton, .vxp-progress.indeterminate > span { animation: none; }
+  .vxp-progress > span { transition: none; }
 }
