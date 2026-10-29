@@ -1,5 +1,11 @@
 # @vex/platform-web
 
+## 0.14.0
+
+### Minor Changes
+
+- f653078: Darker light-mode `--vxp-ok` and `--vxp-warn` so chip text passes AA. New `--vxp-on-bad` for text on `.vxp-btn.danger-solid` (sites that remap `--vxp-bad` should set it). `.vxp-input` gets hover, disabled and invalid (`aria-invalid` / `.is-invalid`) states, `.vxp-field-error` shows a message under a field (StartJob uses it for the payload), and `.vxp-progress` honours reduced motion.
+
 ## 0.13.0
 
 ### Minor Changes
