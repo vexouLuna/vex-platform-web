@@ -142,6 +142,17 @@ Map the variables once, on a plain `:root`:
 }
 ```
 
+Status colours and what sits on them:
+
+| Variable | Used for |
+|---|---|
+| `--vxp-ok`, `--vxp-warn`, `--vxp-bad` | Chip text and borders, callout edges, invalid inputs. Defaults reach 4.5:1 on `--vxp-bg` and `--vxp-surface` in both schemes |
+| `--vxp-on-bad` | Text on a `--vxp-bad` fill (`.vxp-btn.danger-solid`): white on the light red, dark ink on the dark-mode coral. A site that changes `--vxp-bad` sets this to match |
+
+Inputs show `:hover`, `:disabled` and an invalid state (`aria-invalid="true"` or `.is-invalid`); put the message in
+`<span class="vxp-field-error" role="alert">` inside the `.vxp-field`. `.vxp-progress` bars stop animating under
+`prefers-reduced-motion`.
+
 The library declares its defaults (light, and dark under `prefers-color-scheme`) on `:where(:root)`, which has no
 specificity, so a site's `:root` rule wins whatever order the stylesheets load in, including when the library's CSS
 arrives later with a lazily loaded page. No `:root:root` or `!important` is needed. The full list is at the top of

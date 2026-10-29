@@ -141,7 +141,7 @@ async function submit() {
           :aria-invalid="!!parsed.error"
           :aria-describedby="parsed.error ? 'vxp-start-payload' : undefined"
         />
-        <span v-if="parsed.error" id="vxp-start-payload" class="vxp-small bad">{{ parsed.error }}</span>
+        <span v-if="parsed.error" id="vxp-start-payload" class="vxp-field-error" role="alert">{{ parsed.error }}</span>
       </label>
       <div v-if="error" class="vxp-callout error" role="alert">
         <slot name="error" :error="error" :subject="failedSubject">{{ errorText(error) }}</slot>
@@ -160,6 +160,5 @@ dialog.vxp-start { width: min(480px, calc(100vw - 32px)); max-width: none; box-s
 .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
 .desc { margin: -4px 0 0; }
 .payload { height: auto; padding: 6px 8px; resize: vertical; }
-.bad { color: var(--vxp-bad); }
 .actions { margin-top: 4px; }
 </style>
