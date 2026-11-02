@@ -21,6 +21,7 @@ import {
   type JobOut,
   type JobState,
 } from '../src'
+import { atLevel } from '../src/jobs'
 import { mergePages } from '../src/vue/useCursorPages'
 import audit from './fixtures/audit.json'
 import events from './fixtures/events.json'
@@ -184,5 +185,19 @@ describe('jobTree', () => {
     expect(jobTree([run(4)], 4)).toHaveLength(1)
     const { parent_id: _, ...old } = run(6)
     expect(jobTree([old as JobOut], 6).map((r) => r.depth)).toEqual([0])
+  })
+})
+
+describe('atLevel', () => {
+  const at = (level: string) => ({ level }) as EventOut
+  it('keeps debug below info', () => {
+    expect(atLevel(at('debug'), 'info')).toBe(false)
+    expect(atLevel(at('debug'), 'debug')).toBe(true)
+    expect(atLevel(at('info'), 'info')).toBe(true)
+    expect(atLevel(at('error'), 'warning')).toBe(true)
+  })
+  it('counts an unknown level as info', () => {
+    expect(atLevel(at('trace'), 'info')).toBe(true)
+    expect(atLevel(at('trace'), 'warning')).toBe(false)
   })
 })

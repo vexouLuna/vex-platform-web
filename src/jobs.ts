@@ -152,7 +152,10 @@ export const EVENT_LEVELS: readonly EventLevel[] = ['debug', 'info', 'warning', 
 
 /** Whether an event is at `min` or above; an unknown level counts as info. */
 export function atLevel(e: EventOut, min: EventLevel): boolean {
-  const rank = (l: string) => Math.max(EVENT_LEVELS.indexOf(l as EventLevel), 1)
+  const rank = (l: string) => {
+    const i = EVENT_LEVELS.indexOf(l as EventLevel)
+    return i < 0 ? EVENT_LEVELS.indexOf('info') : i
+  }
   return rank(e.level) >= EVENT_LEVELS.indexOf(min)
 }
 
