@@ -31,6 +31,7 @@ const TABS: { value: string; label: string; title?: string; states?: JobState[] 
   { value: 'all', label: 'All' },
   { value: 'active', label: 'Active', title: 'queued, running, paused', states: ['queued', 'running', 'paused'] },
   { value: 'stopped', label: 'Needs attention', title: 'paused, failed, cancelled', states: ['paused', 'failed', 'cancelled'] },
+  { value: 'queued', label: 'Queued', states: ['queued'] },
   { value: 'running', label: 'Running', states: ['running'] },
   { value: 'failed', label: 'Failed', states: ['failed'] },
   { value: 'succeeded', label: 'Succeeded', states: ['succeeded'] },
