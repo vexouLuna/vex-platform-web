@@ -1,6 +1,6 @@
 /** The job queue's filters, as JobsBrowser's `v-model:filters`. */
 export interface JobFilters {
-  /** A tab (`all`, `active`, `stopped`, `running`, `failed`, `succeeded`) or a single state. */
+  /** A tab (`all`, `active`, `stopped`, `queued`, `running`, `failed`, `succeeded`) or a single state. */
   state: string
   kind: string
   /** `type:id`. */
