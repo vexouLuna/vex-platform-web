@@ -1,5 +1,11 @@
 # @vex/platform-web
 
+## 0.14.2
+
+### Patch Changes
+
+- 9fa7f96: Jobs browser: add a Queued tab next to Running.
+
 ## 0.14.1
 
 ### Patch Changes
