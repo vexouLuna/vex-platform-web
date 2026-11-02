@@ -31,6 +31,8 @@ export function useCursorPages<T>(
   const olderCursor = ref<string | null | undefined>(undefined)
   const loadingOlder = ref(false)
   const olderError = ref<string | null>(null)
+  // Bumped by reset(): an older page requested before it belongs to the old filters and is dropped.
+  let generation = 0
 
   const items = computed(() => mergePages(first.data.value?.items ?? [], older.value, key))
   const nextCursor = computed(() => (olderCursor.value === undefined ? (first.data.value?.next_cursor ?? null) : olderCursor.value))
@@ -40,20 +42,24 @@ export function useCursorPages<T>(
     const cursor = nextCursor.value
     if (!cursor || loadingOlder.value) return
     loadingOlder.value = true
+    const mine = generation
     try {
       const page = await load(cursor)
+      if (mine !== generation) return
       older.value = [...older.value, ...page.items]
       olderCursor.value = page.next_cursor
       olderError.value = null
     } catch (e) {
-      olderError.value = errorText(e)
+      if (mine === generation) olderError.value = errorText(e)
     } finally {
-      loadingOlder.value = false
+      if (mine === generation) loadingOlder.value = false
     }
   }
 
   /** Back to the first page alone (after the filters changed), and reload it. */
   function reset() {
+    generation++
+    loadingOlder.value = false
     older.value = []
     olderCursor.value = undefined
     olderError.value = null
