@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { PlatformClient, ProblemError, parsePayload, sameGates, toggleGate, type JobKindOut, type JobOut } from '../src'
-import { LoadState, PauseGates, StartJob } from '../src/vue'
+import { JobsTable, LoadState, PauseGates, StartJob } from '../src/vue'
 import kinds from './fixtures/job-kinds.json'
 import jobs from './fixtures/jobs.json'
 import vodNotFound from './fixtures/problem-vod-not-found.json'
@@ -114,5 +114,14 @@ describe('LoadState', () => {
     expect(w.text()).toContain('Nothing queued.')
     await w.setProps({ empty: false })
     expect(w.find('.content').exists()).toBe(true)
+  })
+})
+
+describe('JobsTable', () => {
+  it('shows the step position only when the run has steps', () => {
+    const run = { ...(jobs.items[0] as JobOut), state: 'running', step: 'download' } as JobOut
+    const text = (steps: string[]) => mount(JobsTable, { props: { jobs: [{ ...run, steps }] } }).text()
+    expect(text(['download', 'upload'])).toContain('1/2')
+    expect(text([])).not.toContain('/0')
   })
 })

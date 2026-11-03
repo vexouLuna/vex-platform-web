@@ -77,7 +77,7 @@ function toggleAll(on: boolean) {
             <span v-if="j.state === 'succeeded'" class="vxp-muted">finished</span>
             <template v-else>
               {{ j.step ?? '—' }}
-              <span class="vxp-muted">{{ stepPosition(j).index + 1 }}/{{ stepPosition(j).total }}</span>
+              <span v-if="stepPosition(j).total" class="vxp-muted">{{ stepPosition(j).index + 1 }}/{{ stepPosition(j).total }}</span>
             </template>
             <div v-if="j.last_error && (j.state === 'failed' || scheduledFor(j))" class="err" :title="j.last_error">{{ j.last_error }}</div>
           </td>
