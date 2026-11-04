@@ -1,5 +1,11 @@
 # @vex/platform-web
 
+## 0.14.3
+
+### Patch Changes
+
+- a4061c8: `JobsTable` no longer shows "1/0" for a run whose kind has no steps.
+
 ## 0.14.2
 
 ### Patch Changes
