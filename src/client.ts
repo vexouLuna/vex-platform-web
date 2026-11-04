@@ -102,6 +102,10 @@ export class PlatformClient {
   cancel(id: number): Promise<JobOut> {
     return this.request('POST', `/jobs/${id}/cancel`)
   }
+  /** Take a failed or cancelled run out of alerts and counts; it stays in history (vex-platform 0.10+). */
+  dismiss(id: number): Promise<JobOut> {
+    return this.request('POST', `/jobs/${id}/dismiss`)
+  }
   /** Oldest first, after `cursor`. `next_cursor` is never null: pass it back to follow the log. */
   events(id: number, cursor?: string | null, limit?: number, signal?: AbortSignal): Promise<Page<EventOut> & { next_cursor: string }> {
     return this.request('GET', `/jobs/${id}/events${query({ cursor, limit })}`, undefined, signal)

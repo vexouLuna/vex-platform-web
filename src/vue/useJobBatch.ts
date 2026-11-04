@@ -8,7 +8,7 @@ import type { JobOut } from '../types'
 import { usePlatformUi } from './config'
 
 const CONCURRENCY = 4
-const DONE: Record<BatchAction, string> = { pause: 'Pausing', resume: 'Resumed', retry: 'Retrying', cancel: 'Cancelling' }
+const DONE: Record<BatchAction, string> = { pause: 'Pausing', resume: 'Resumed', retry: 'Retrying', cancel: 'Cancelling', dismiss: 'Dismissed' }
 
 export interface BatchResult {
   ok: number[]
@@ -21,10 +21,10 @@ export function useJobBatch(client: PlatformClient, done?: (result: BatchResult)
   const busy = ref<BatchAction | null>(null)
 
   const call = (action: BatchAction, id: number) =>
-    action === 'pause' ? client.pause(id) : action === 'resume' ? client.resume(id) : action === 'retry' ? client.retry(id) : client.cancel(id)
+    action === 'pause' ? client.pause(id) : action === 'resume' ? client.resume(id) : action === 'retry' ? client.retry(id) : action === 'dismiss' ? client.dismiss(id) : client.cancel(id)
 
   /** Sends `action` to each of `jobs` it applies to; the rest are left alone. */
-  async function run(action: BatchAction, jobs: readonly Pick<JobOut, 'id' | 'state' | 'cancel_requested'>[]): Promise<BatchResult | null> {
+  async function run(action: BatchAction, jobs: readonly Pick<JobOut, 'id' | 'state' | 'cancel_requested' | 'dismissed_at'>[]): Promise<BatchResult | null> {
     const ids = batchTargets(jobs, action).map((j) => j.id)
     if (busy.value || !ids.length) return null
     busy.value = action

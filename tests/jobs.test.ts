@@ -59,6 +59,11 @@ describe('jobActions', () => {
     ])
   })
 
+  it('offers a dismiss to failed and cancelled runs not dismissed yet', () => {
+    expect((['queued', 'paused', 'succeeded', 'failed', 'cancelled'] as const).map((s) => jobActions(as(s)).dismiss)).toEqual([false, false, false, true, true])
+    expect(jobActions(as('failed', { dismissed_at: '2026-10-01T00:00:00Z' })).dismiss).toBe(false)
+  })
+
   it("doesn't offer a cancel already asked for", () => {
     expect(jobActions(as('running', { cancel_requested: true })).cancel).toBe(false)
   })

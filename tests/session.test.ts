@@ -100,10 +100,11 @@ describe('safeNext', () => {
 
 describe('filters in the query', () => {
   it('reads and writes the jobs filters', () => {
-    expect(jobFiltersFrom({ state: 'failed', kind: 'upload', subject: ['a', 'b'] })).toEqual({ state: 'failed', kind: 'upload', subject: '' })
-    expect(jobFiltersFrom({})).toEqual({ state: 'all', kind: '', subject: '' })
+    expect(jobFiltersFrom({ state: 'failed', kind: 'upload', subject: ['a', 'b'] })).toEqual({ state: 'failed', kind: 'upload', subject: '', showDismissed: false })
+    expect(jobFiltersFrom({})).toEqual({ state: 'all', kind: '', subject: '', showDismissed: false })
     expect(jobFiltersQuery({ state: 'all', kind: '', subject: 'vod:1' })).toEqual({ subject: 'vod:1' })
     expect(jobFiltersQuery({ state: 'active', kind: 'upload', subject: '' })).toEqual({ state: 'active', kind: 'upload' })
+    expect(jobFiltersQuery(jobFiltersFrom({ state: 'failed', dismissed: '1' }))).toEqual({ state: 'failed', dismissed: '1' })
   })
 
   it('reads and writes the audit filters, trimmed', () => {

@@ -5,7 +5,7 @@ import { errorText } from '../errors'
 import type { JobOut, JobUpdate } from '../types'
 import { usePlatformUi } from './config'
 
-export type JobAction = 'pause' | 'resume' | 'once' | 'retry' | 'cancel' | 'update'
+export type JobAction = 'pause' | 'resume' | 'once' | 'retry' | 'cancel' | 'dismiss' | 'update'
 
 export function useJobActions(client: PlatformClient, done?: (job: JobOut) => void) {
   const ui = usePlatformUi()
@@ -41,6 +41,7 @@ export function useJobActions(client: PlatformClient, done?: (job: JobOut) => vo
     retry: (id: number, step?: string | null, opts: { at?: string | null; pause_before?: string[] } = {}) =>
       act('retry', () => client.retry(id, step, opts), `${opts.at ? 'Scheduled a retry' : 'Retrying'}${step ? ` from ${step}` : ''}`),
     cancel: (id: number) => act('cancel', () => client.cancel(id), 'Cancelling'),
+    dismiss: (id: number) => act('dismiss', () => client.dismiss(id), 'Dismissed'),
     update: (id: number, patch: JobUpdate, ok = 'Saved') => act('update', () => client.updateJob(id, patch), ok),
   }
 }

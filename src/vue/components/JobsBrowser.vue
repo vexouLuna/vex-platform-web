@@ -39,6 +39,10 @@ const TABS: { value: string; label: string; title?: string; states?: JobState[] 
 const states = (tab: string): JobState[] | undefined =>
   TABS.find((t) => t.value === tab)?.states ?? (tab && tab !== 'all' ? [tab as JobState] : undefined)
 
+/** The tabs that warn: dismissed runs stay off them unless asked for. */
+const ALERT_TABS = ['stopped', 'failed']
+const alertTab = computed(() => ALERT_TABS.includes(filters.value.state))
+
 const set = (patch: Partial<JobFilters>) => (filters.value = { ...filters.value, ...patch })
 
 const loadedKinds = ref<JobKindOut[]>([])
@@ -74,6 +78,7 @@ const pages = useCursorPages(
         state: states(filters.value.state),
         kind: filters.value.kind || undefined,
         subject: filters.value.subject || undefined,
+        dismissed: alertTab.value && !filters.value.showDismissed ? false : undefined,
         cursor,
         limit: props.pageSize,
       },
@@ -83,7 +88,7 @@ const pages = useCursorPages(
 )
 const selected = ref<number[]>([])
 watch(
-  () => [filters.value.state, filters.value.kind, filters.value.subject],
+  () => [filters.value.state, filters.value.kind, filters.value.subject, filters.value.showDismissed],
   () => {
     selected.value = []
     pages.reset()
@@ -98,6 +103,7 @@ const chosen = computed(() => {
 const BATCH: { action: BatchAction; label: string; title: string }[] = [
   { action: 'resume', label: 'Resume', title: 'The paused ones' },
   { action: 'pause', label: 'Pause', title: 'The queued and running ones' },
+  { action: 'dismiss', label: 'Dismiss', title: 'The failed and cancelled ones: out of alerts and counts, still in history' },
   { action: 'retry', label: 'Retry', title: 'The finished ones: failed and cancelled from where they stopped, succeeded from the start' },
 ]
 const cancellable = computed(() => batchTargets(chosen.value, 'cancel').length)
@@ -148,6 +154,10 @@ defineExpose({ refresh: pages.refresh })
           <option v-for="k in kindNames" :key="k" :value="k">{{ k }}</option>
         </select>
         <input v-model="subjectDraft" class="vxp-input vxp-mono subject" type="search" aria-label="Subject" :placeholder="subjectHint" />
+        <label v-if="alertTab" class="vxp-check vxp-small">
+          <input type="checkbox" :checked="!!filters.showDismissed" @change="set({ showDismissed: ($event.target as HTMLInputElement).checked })" />
+          Show dismissed
+        </label>
         <span class="grow" />
         <slot name="actions" />
         <button type="button" class="vxp-btn" :aria-busy="pages.loading.value" @click="pages.refresh">Refresh</button>

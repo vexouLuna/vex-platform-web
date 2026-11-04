@@ -70,7 +70,7 @@ function toggleAll(on: boolean) {
           <td class="vxp-mono">{{ j.kind }}</td>
           <td><SubjectLink :subject="j.subject" /></td>
           <td>
-            <StateChip :state="j.state" :cancelling="j.cancel_requested && j.state === 'running'" :scheduled="scheduledFor(j)" />
+            <StateChip :state="j.state" :cancelling="j.cancel_requested && j.state === 'running'" :scheduled="scheduledFor(j)" :dismissed="!!j.dismissed_at" />
             <div v-if="scheduledFor(j)" class="vxp-muted nowrap" :title="ui.stamp(j.not_before)">{{ ui.timeAgo(j.not_before) }}</div>
           </td>
           <td class="vxp-mono">
