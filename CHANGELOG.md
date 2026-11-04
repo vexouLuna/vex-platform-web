@@ -1,5 +1,12 @@
 # @vex/platform-web
 
+## 0.15.0
+
+### Minor Changes
+
+- 1ff0c97: Dismiss a failed or cancelled run (`client.dismiss`, `jobs({ dismissed })`, `jobCounts({ include_dismissed })`, `dismissed_at` on runs; needs vex-platform 0.10): a Dismiss button on the run page and in the batch bar, a dismissed chip, and a "Show dismissed" toggle on the Needs attention and Failed tabs, which leave dismissed runs out by default. The run page's buttons read "Retry now" and "Resume".
+- 88b49e5: Schedules (needs vex-platform 0.10 with `jobs_sql(6)` applied): `client.schedules`, `createSchedule`, `updateSchedule`, `deleteSchedule`, `pauseSchedule`, `resumeSchedule` and `runSchedule`, `schedule_id` on runs, and a `SchedulesBrowser` component (cron in UTC, Pause, Resume, Run now, Edit, Delete, and a form for the kinds the app lists as schedulable). The run page's "Resume" button no longer says "Resume schedule".
+
 ## 0.14.3
 
 ### Patch Changes
