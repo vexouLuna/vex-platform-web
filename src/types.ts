@@ -52,6 +52,41 @@ export interface JobOut {
   finished_at: string | null
   /** When a failed or cancelled run was dismissed: out of alerts and counts, still in history (vex-platform 0.10+). */
   dismissed_at?: string | null
+  /** The schedule that queued this run, if one did (vex-platform 0.10+). */
+  schedule_id?: number | null
+}
+
+/** A recurring job (vex-platform 0.10+): `cron` is five fields, in UTC. */
+export interface ScheduleOut {
+  id: number
+  name: string
+  kind: string
+  subject: string | null
+  payload: Record<string, unknown>
+  cron: string
+  paused_at: string | null
+  last_run_at: string | null
+  next_run_at: string
+  actor: Actor
+  created_at: string
+  updated_at: string
+}
+export interface SchedulesOut {
+  items: ScheduleOut[]
+  /** The kinds a schedule may be created for. */
+  kinds: string[]
+}
+export interface ScheduleIn {
+  name: string
+  kind: string
+  cron: string
+  subject?: string | null
+  payload?: Record<string, unknown>
+}
+export interface ScheduleUpdate {
+  cron?: string
+  subject?: string | null
+  payload?: Record<string, unknown>
 }
 
 export type ProgressUnit = 'items' | 'parts' | 'bytes' | 'percent' | 'seconds' | (string & {})
