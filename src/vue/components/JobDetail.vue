@@ -151,7 +151,7 @@ defineExpose({ refresh })
       <div v-if="error" class="vxp-callout warn">Refresh failed: {{ error }}. Showing the last known state.</div>
 
       <div class="actions">
-        <button v-if="actions?.resume" type="button" class="vxp-btn primary" :disabled="!!busy" :aria-busy="busy === 'resume'" @click="run.resume(id)">Resume schedule</button>
+        <button v-if="actions?.resume" type="button" class="vxp-btn primary" :disabled="!!busy" :aria-busy="busy === 'resume'" @click="run.resume(id)">Resume</button>
         <button v-if="actions?.resume" type="button" class="vxp-btn" :disabled="!!busy" :aria-busy="busy === 'once'" @click="run.once(id)">Run one step</button>
         <button v-if="actions?.pause" type="button" class="vxp-btn" :disabled="!!busy" :aria-busy="busy === 'pause'" @click="run.pause(id)">Pause</button>
         <template v-if="actions?.retry">

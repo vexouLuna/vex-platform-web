@@ -1,7 +1,7 @@
 // Client for the routes every vex-platform app serves under /api/v2: job runs, their events and kinds, and the
 // audit log. Auth is the site's: a session cookie (writes carry its CSRF token) or a Bearer key.
 import { ProblemError } from './errors'
-import type { AuditOut, AuditQuery, EnqueueIn, EventOut, EventPage, EventQuery, JobCountsOut, JobCountsQuery, JobKindOut, JobOut, JobQuery, JobUpdate, Page, RelatedOut } from './types'
+import type { AuditOut, AuditQuery, EnqueueIn, EventOut, EventPage, EventQuery, JobCountsOut, JobCountsQuery, JobKindOut, JobOut, JobQuery, JobUpdate, Page, RelatedOut, ScheduleIn, ScheduleOut, SchedulesOut, ScheduleUpdate } from './types'
 
 export type Fetch = (input: string, init?: RequestInit) => Promise<Response>
 
@@ -120,6 +120,30 @@ export class PlatformClient {
   }
   jobKinds(signal?: AbortSignal): Promise<JobKindOut[]> {
     return this.request('GET', '/job-kinds', undefined, signal)
+  }
+
+  // ---- schedules (vex-platform 0.10+) ----
+  schedules(signal?: AbortSignal): Promise<SchedulesOut> {
+    return this.request('GET', '/schedules', undefined, signal)
+  }
+  createSchedule(body: ScheduleIn): Promise<ScheduleOut> {
+    return this.request('POST', '/schedules', body)
+  }
+  updateSchedule(id: number, body: ScheduleUpdate): Promise<ScheduleOut> {
+    return this.request('PATCH', `/schedules/${id}`, body)
+  }
+  deleteSchedule(id: number): Promise<void> {
+    return this.request('DELETE', `/schedules/${id}`)
+  }
+  pauseSchedule(id: number): Promise<ScheduleOut> {
+    return this.request('POST', `/schedules/${id}/pause`)
+  }
+  resumeSchedule(id: number): Promise<ScheduleOut> {
+    return this.request('POST', `/schedules/${id}/resume`)
+  }
+  /** Queue its run now, paused or not. */
+  runSchedule(id: number): Promise<JobOut> {
+    return this.request('POST', `/schedules/${id}/run-now`)
   }
 
   // ---- audit ----

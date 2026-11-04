@@ -41,6 +41,27 @@ describe('PlatformClient', () => {
     ])
   })
 
+  it('lists, creates, edits, pauses, resumes, runs and deletes schedules', async () => {
+    const { api, fetch } = client(() => json({ items: [], kinds: ['cleanup'] }))
+    await api.schedules()
+    await api.createSchedule({ name: 'nightly', kind: 'cleanup', cron: '0 3 * * *' })
+    await api.updateSchedule(3, { cron: '0 4 * * *' })
+    await api.pauseSchedule(3)
+    await api.resumeSchedule(3)
+    await api.runSchedule(3)
+    await api.deleteSchedule(3)
+    expect(fetch.mock.calls.map((c) => [String(c[0]), c[1]?.method])).toEqual([
+      ['/api/v2/schedules', 'GET'],
+      ['/api/v2/schedules', 'POST'],
+      ['/api/v2/schedules/3', 'PATCH'],
+      ['/api/v2/schedules/3/pause', 'POST'],
+      ['/api/v2/schedules/3/resume', 'POST'],
+      ['/api/v2/schedules/3/run-now', 'POST'],
+      ['/api/v2/schedules/3', 'DELETE'],
+    ])
+    expect(JSON.parse(String(fetch.mock.calls[1]![1]?.body))).toEqual({ name: 'nightly', kind: 'cleanup', cron: '0 3 * * *' })
+  })
+
   it('counts jobs per state, with the filters in the query', async () => {
     const counts = { counts: { queued: 1, running: 0, paused: 0, succeeded: 3, failed: 1, cancelled: 0 }, total: 5 }
     const { api, fetch } = client(() => json(counts))
