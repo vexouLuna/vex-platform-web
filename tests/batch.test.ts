@@ -16,6 +16,7 @@ describe('batchTargets', () => {
     expect(batchTargets(runs, 'pause').map((j) => j.id)).toEqual([2, 3])
     expect(batchTargets(runs, 'cancel').map((j) => j.id)).toEqual([1, 2])
     expect(batchTargets(runs, 'retry').map((j) => j.id)).toEqual([4, 5])
+    expect(batchTargets([...runs, job(6, 'cancelled'), job(7, 'failed', { dismissed_at: '2026-10-01T00:00:00Z' })], 'dismiss').map((j) => j.id)).toEqual([4, 6])
   })
 })
 

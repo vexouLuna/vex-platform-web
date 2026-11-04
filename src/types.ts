@@ -50,6 +50,8 @@ export interface JobOut {
   updated_at: string
   started_at: string | null
   finished_at: string | null
+  /** When a failed or cancelled run was dismissed: out of alerts and counts, still in history (vex-platform 0.10+). */
+  dismissed_at?: string | null
 }
 
 export type ProgressUnit = 'items' | 'parts' | 'bytes' | 'percent' | 'seconds' | (string & {})
@@ -107,6 +109,8 @@ export interface JobQuery {
   subject?: string
   /** Only the runs this run queued (vex-platform 0.6+). */
   parent?: number
+  /** `false`: leave dismissed runs out; `true`: only them (vex-platform 0.10+). */
+  dismissed?: boolean
   cursor?: string | null
   limit?: number
 }
@@ -126,6 +130,8 @@ export interface JobCountsQuery {
   subject?: string
   /** Finished runs only from this time on (ISO 8601); active runs are always counted. */
   since?: string | null
+  /** Count dismissed runs too; they are left out otherwise (vex-platform 0.10+). */
+  include_dismissed?: boolean
 }
 
 /** `GET /jobs/counts` (vex-platform 0.5): runs per state, every state present. */

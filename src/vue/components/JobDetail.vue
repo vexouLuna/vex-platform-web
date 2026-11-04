@@ -151,7 +151,7 @@ defineExpose({ refresh })
       <div v-if="error" class="vxp-callout warn">Refresh failed: {{ error }}. Showing the last known state.</div>
 
       <div class="actions">
-        <button v-if="actions?.resume" type="button" class="vxp-btn primary" :disabled="!!busy" :aria-busy="busy === 'resume'" @click="run.resume(id)">Resume</button>
+        <button v-if="actions?.resume" type="button" class="vxp-btn primary" :disabled="!!busy" :aria-busy="busy === 'resume'" @click="run.resume(id)">Resume schedule</button>
         <button v-if="actions?.resume" type="button" class="vxp-btn" :disabled="!!busy" :aria-busy="busy === 'once'" @click="run.once(id)">Run one step</button>
         <button v-if="actions?.pause" type="button" class="vxp-btn" :disabled="!!busy" :aria-busy="busy === 'pause'" @click="run.pause(id)">Pause</button>
         <template v-if="actions?.retry">
@@ -163,7 +163,8 @@ defineExpose({ refresh })
             <option :value="-1">at a time…</option>
           </select>
           <input v-if="retryIn === -1" v-model="retryAt" type="datetime-local" class="vxp-input" aria-label="Retry at" :disabled="!!busy" />
-          <button type="button" class="vxp-btn primary" :disabled="!!busy" :aria-busy="busy === 'retry'" @click="retry">{{ retryIn ? 'Schedule retry' : 'Retry' }}</button>
+          <button type="button" class="vxp-btn primary" :disabled="!!busy" :aria-busy="busy === 'retry'" @click="retry">{{ retryIn ? 'Schedule retry' : 'Retry now' }}</button>
+          <button v-if="actions?.dismiss" type="button" class="vxp-btn" title="Out of alerts and counts; stays in history" :disabled="!!busy" :aria-busy="busy === 'dismiss'" @click="run.dismiss(id)">Dismiss</button>
         </template>
         <button v-if="actions?.cancel" type="button" class="vxp-btn danger" :disabled="!!busy" :aria-busy="busy === 'cancel'" @click="dialog?.showModal()">Cancel</button>
         <slot name="actions" :job="job" />

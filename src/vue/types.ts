@@ -5,6 +5,8 @@ export interface JobFilters {
   kind: string
   /** `type:id`. */
   subject: string
+  /** Also list dismissed runs under the Needs attention and Failed tabs. */
+  showDismissed?: boolean
 }
 
 /** The audit filters, as AuditBrowser's `v-model:filters`. All but `scope` are typed by the user. */

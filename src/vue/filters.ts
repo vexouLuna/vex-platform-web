@@ -7,13 +7,14 @@ type Query = Record<string, unknown>
 const one = (q: Query, k: string): string => (typeof q[k] === 'string' ? (q[k] as string) : '')
 
 export function jobFiltersFrom(q: Query): JobFilters {
-  return { state: one(q, 'state') || 'all', kind: one(q, 'kind'), subject: one(q, 'subject') }
+  return { state: one(q, 'state') || 'all', kind: one(q, 'kind'), subject: one(q, 'subject'), showDismissed: q.dismissed === '1' }
 }
 
 /** The query for these filters: empty ones and the `all` tab left out. */
 export function jobFiltersQuery(f: JobFilters): Record<string, string> {
   const query: Record<string, string> = {}
-  for (const [k, v] of Object.entries(f)) if (v && !(k === 'state' && v === 'all')) query[k] = v
+  for (const k of ['state', 'kind', 'subject'] as const) if (f[k] && !(k === 'state' && f[k] === 'all')) query[k] = f[k]
+  if (f.showDismissed) query.dismissed = '1'
   return query
 }
 

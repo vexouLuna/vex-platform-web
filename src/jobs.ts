@@ -24,7 +24,7 @@ export function scheduledFor(job: Pick<JobOut, 'state' | 'not_before'>, now = Da
 }
 
 /** The actions vex-platform accepts for a run in its state (anything else is a 409 `job_conflict`). */
-export function jobActions(job: Pick<JobOut, 'state' | 'cancel_requested'>) {
+export function jobActions(job: Pick<JobOut, 'state' | 'cancel_requested' | 'dismissed_at'>) {
   return {
     pause: job.state === 'queued' || job.state === 'running',
     resume: job.state === 'paused',
@@ -32,15 +32,17 @@ export function jobActions(job: Pick<JobOut, 'state' | 'cancel_requested'>) {
     retry: !isActive(job.state),
     // A cancel already asked for is waiting on a cooperative step; asking again changes nothing.
     cancel: isActive(job.state) && !job.cancel_requested,
+    /** A failed or cancelled run that isn't dismissed yet. */
+    dismiss: (job.state === 'failed' || job.state === 'cancelled') && !job.dismissed_at,
     /** Pause gates and pause-next can be changed while the run is active. */
     edit: isActive(job.state),
   }
 }
 
-export type BatchAction = 'pause' | 'resume' | 'retry' | 'cancel'
+export type BatchAction = 'pause' | 'resume' | 'retry' | 'cancel' | 'dismiss'
 
 /** The runs among `jobs` that `action` applies to in their state; sending it to the others would be a 409. */
-export function batchTargets<J extends Pick<JobOut, 'state' | 'cancel_requested'>>(jobs: readonly J[], action: BatchAction): J[] {
+export function batchTargets<J extends Pick<JobOut, 'state' | 'cancel_requested' | 'dismissed_at'>>(jobs: readonly J[], action: BatchAction): J[] {
   return jobs.filter((j) => jobActions(j)[action])
 }
 

@@ -29,6 +29,18 @@ describe('PlatformClient', () => {
     expect(page.next_cursor).toBe('eyJpZCI6ODExfQ')
   })
 
+  it('filters dismissed runs and dismisses one', async () => {
+    const { api, fetch } = client(() => json(jobs))
+    await api.jobs({ state: ['failed'], dismissed: false })
+    await api.jobCounts({ include_dismissed: true })
+    await api.dismiss(811)
+    expect(fetch.mock.calls.map((c) => [String(c[0]), c[1]?.method])).toEqual([
+      ['/api/v2/jobs?state=failed&dismissed=false', 'GET'],
+      ['/api/v2/jobs/counts?include_dismissed=true', 'GET'],
+      ['/api/v2/jobs/811/dismiss', 'POST'],
+    ])
+  })
+
   it('counts jobs per state, with the filters in the query', async () => {
     const counts = { counts: { queued: 1, running: 0, paused: 0, succeeded: 3, failed: 1, cancelled: 0 }, total: 5 }
     const { api, fetch } = client(() => json(counts))
