@@ -1,5 +1,11 @@
 # vex-platform-web
 
+<!-- conventions:begin: synced from vexouLuna/conventions; edit it there, then run `conventions sync` -->
+[![CI](https://github.com/vexouLuna/vex-platform-web/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vexouLuna/vex-platform-web/actions/workflows/ci.yml?query=branch%3Amain)
+[![version](https://img.shields.io/github/v/tag/vexouLuna/vex-platform-web?sort=semver&label=version)](https://github.com/vexouLuna/vex-platform-web/tags)
+[![conventions v4.0.0](https://img.shields.io/badge/conventions-v4.0.0-blue)](https://github.com/vexouLuna/conventions/tree/v4.0.0)
+<!-- conventions:end -->
+
 The web side of [vex-platform](https://github.com/vexouLuna/vex-platform): a client and Vue components for the routes
 every vex-platform app serves under `/api/v2` (job runs, their events and kinds, the audit log), plus the chat-line
 parsing and rendering that VOD chat replay and a bot's chat log share.
