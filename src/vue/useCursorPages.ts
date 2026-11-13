@@ -1,6 +1,6 @@
 // A newest-first list read by cursor: the first page polled (so new rows show up on top), and older pages appended
 // on demand from the last page's `next_cursor`.
-import { computed, ref, shallowRef } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { errorText } from '../errors'
 import type { Page } from '../types'
 import { usePoll } from './usePoll'
@@ -33,6 +33,10 @@ export function useCursorPages<T>(
   const olderError = ref<string | null>(null)
   // Bumped by reset(): an older page requested before it belongs to the old filters and is dropped.
   let generation = 0
+  // The first page's `next_cursor` the older rows continue from. New rows push page 1's last rows off it, into the gap
+  // between the two; when the live cursor moves away from this one the gap is read again (see fillGap).
+  let anchor: string | null | undefined
+  let filling = false
 
   const items = computed(() => mergePages(first.data.value?.items ?? [], older.value, key))
   const nextCursor = computed(() => (olderCursor.value === undefined ? (first.data.value?.next_cursor ?? null) : olderCursor.value))
@@ -41,6 +45,7 @@ export function useCursorPages<T>(
   async function loadOlder() {
     const cursor = nextCursor.value
     if (!cursor || loadingOlder.value) return
+    if (olderCursor.value === undefined) anchor = cursor
     loadingOlder.value = true
     const mine = generation
     try {
@@ -56,12 +61,47 @@ export function useCursorPages<T>(
     }
   }
 
+  // Rows that left page 1 after the older ones were loaded sit between page 1 and the older rows. Read from the live
+  // cursor until it meets a row already held (or the end), and put them in front of the older ones. A failed read is
+  // tried again on the next poll.
+  async function fillGap(live: string) {
+    filling = true
+    const mine = generation
+    try {
+      const held = new Set(older.value.map(key))
+      const gap: T[] = []
+      let cursor: string | null = live
+      while (cursor) {
+        const page = await load(cursor)
+        if (mine !== generation) return
+        const hit = page.items.findIndex((r) => held.has(key(r)))
+        gap.push(...(hit < 0 ? page.items : page.items.slice(0, hit)))
+        cursor = hit < 0 ? page.next_cursor : null
+      }
+      older.value = [...gap, ...older.value]
+      anchor = live
+    } catch {
+      // keep the old anchor
+    } finally {
+      filling = false
+    }
+  }
+  watch(
+    first.data,
+    (page) => {
+      if (page?.next_cursor && older.value.length && !filling && olderCursor.value !== undefined && page.next_cursor !== anchor) fillGap(page.next_cursor)
+    },
+    { flush: 'sync' },
+  )
+
   /** Back to the first page alone (after the filters changed), and reload it. */
   function reset() {
     generation++
     loadingOlder.value = false
     older.value = []
     olderCursor.value = undefined
+    anchor = undefined
+    filling = false
     olderError.value = null
     first.data.value = null
     return first.refresh()

@@ -13,6 +13,9 @@ export const STATE_TONE: Record<JobState, Tone> = {
   cancelled: 'default',
 }
 
+/** How often to poll a run: `poll` while it can change, a slow `poll` x 10 (at least 30 s) once it is settled, so a retry made elsewhere still shows. 0 stays 0. */
+export const settledPoll = (poll: number, active: boolean): number => (active || poll <= 0 ? poll : Math.max(poll * 10, 30_000))
+
 export const isActive = (state: JobState): boolean => state === 'queued' || state === 'running' || state === 'paused'
 
 /**
