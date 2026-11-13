@@ -65,9 +65,9 @@ export class ProblemError extends Error {
     this.extra = Object.fromEntries(Object.entries(body).filter(([k]) => !KNOWN.has(k)))
   }
 
-  /** Not signed in, or not allowed. */
+  /** Not signed in (401). A 403 is a refusal of this one request (a role limit, a CSRF reject), not the end of the session. */
   get unauthorized(): boolean {
-    return this.status === 401 || this.status === 403
+    return this.status === 401
   }
 
   /** When to try again, for a rate-limited login: "Try again in 5 min." (whole minutes, rounded up), or "Try again in

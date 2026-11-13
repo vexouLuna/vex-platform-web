@@ -112,7 +112,7 @@ describe('PlatformClient', () => {
     expect((fetch.mock.calls[0]![1]!.headers as Record<string, string>).authorization).toBe('Bearer key')
   })
 
-  it('throws problem details and reports 401/403', async () => {
+  it('throws problem details and reports 401 but not 403', async () => {
     const onUnauthorized = vi.fn()
     const problem = { type: 'about:blank', title: 'Conflict', status: 409, code: 'job_conflict', detail: 'Job 811 is failed; it cannot be paused.', request_id: 'r1' }
     const { api } = client(() => json(problem, 409), { onUnauthorized })
@@ -122,7 +122,12 @@ describe('PlatformClient', () => {
     expect(onUnauthorized).not.toHaveBeenCalled()
 
     const denied = client(() => json({ title: 'Forbidden', status: 403, code: 'forbidden' }, 403), { onUnauthorized })
-    await denied.api.jobs().catch(() => {})
+    const forbidden = await denied.api.jobs().catch((e) => e)
+    expect(forbidden.status).toBe(403)
+    expect(onUnauthorized).not.toHaveBeenCalled()
+
+    const expired = client(() => json({ title: 'Unauthorized', status: 401, code: 'unauthorized' }, 401), { onUnauthorized })
+    await expired.api.jobs().catch(() => {})
     expect(onUnauthorized).toHaveBeenCalledOnce()
   })
 

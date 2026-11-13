@@ -4,7 +4,7 @@
 import { computed, ref, watch } from 'vue'
 import { auditActor } from '../../audit'
 import type { PlatformClient } from '../../client'
-import { EVENT_LEVELS, duration, isActive, jobActions, progressRatio, progressText, runTime, scheduledFor, stepStates } from '../../jobs'
+import { EVENT_LEVELS, duration, isActive, jobActions, progressRatio, progressText, runTime, scheduledFor, settledPoll, stepStates } from '../../jobs'
 import type { EventLevel, JobKindOut, JobOut } from '../../types'
 import { usePlatformUi } from '../config'
 import { useEventTail } from '../useEventTail'
@@ -33,8 +33,8 @@ const props = withDefaults(
 const emit = defineEmits<{ loaded: [job: JobOut] }>()
 const ui = usePlatformUi()
 
-// Polled until the run stops; a retry or resume (through the actions here) refreshes it and polling starts again.
-let stopped = false
+// Polled quickly while the run can change, slowly once it has stopped (so a retry or resume made elsewhere still shows).
+let active = true
 const {
   data: job,
   error,
@@ -42,10 +42,10 @@ const {
 } = usePoll<JobOut>(
   async (signal) => {
     const j = await props.client.job(props.id, signal)
-    stopped = !isActive(j.state)
+    active = isActive(j.state)
     return j
   },
-  (): number => (stopped ? 0 : props.poll),
+  (): number => settledPoll(props.poll, active),
 )
 // The log's lowest level shown; debug lines (what a check found, what was skipped) only when asked for.
 const level = ref<EventLevel>('info')
@@ -95,7 +95,7 @@ const took = computed(() => (job.value ? runTime(job.value) : null))
 
 const run = useJobActions(props.client, (j) => {
   job.value = j
-  stopped = !isActive(j.state)
+  active = isActive(j.state)
   refresh()
   tail.refresh()
 })

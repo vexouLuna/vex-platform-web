@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
-import { PlatformClient, ProblemError, parsePayload, sameGates, toggleGate, type JobKindOut, type JobOut } from '../src'
+import { PlatformClient, settledPoll, ProblemError, parsePayload, sameGates, toggleGate, type JobKindOut, type JobOut } from '../src'
 import { JobsTable, LoadState, PauseGates, StartJob } from '../src/vue'
 import kinds from './fixtures/job-kinds.json'
 import jobs from './fixtures/jobs.json'
@@ -79,6 +79,21 @@ describe('StartJob', () => {
     w.unmount()
   })
 
+  it('starts the next run from a clean form', async () => {
+    const { w } = setup(() => json(queued, 201))
+    await w.findAll('select')[0]!.setValue(all[1]!.name)
+    await w.findAll('input[type=checkbox]').find((i) => !i.element.closest('fieldset'))!.setValue(true)
+    await w.find('textarea').setValue('{"force": true}')
+    await w.find('form').trigger('submit')
+    await flushPromises()
+    expect(w.emitted('started')).toHaveLength(1)
+    expect((w.find('textarea').element as HTMLTextAreaElement).value).toBe('')
+    expect((w.findAll('input[type=checkbox]').find((i) => !i.element.closest('fieldset'))!.element as HTMLInputElement).checked).toBe(false)
+    await flushPromises()
+    expect((w.findAll('select')[0]!.element as HTMLSelectElement).value).toBe(all[0]!.name)
+    w.unmount()
+  })
+
   it("won't send a payload that isn't an object", async () => {
     const { fetch, w } = setup(() => json(queued, 201))
     await w.find('textarea').setValue('[1, 2]')
@@ -96,6 +111,15 @@ describe('StartJob', () => {
     expect(w.find('[role=alert]').text()).toBe('vod_not_found 2551234567')
     expect(w.emitted('started')).toBeUndefined()
     w.unmount()
+  })
+})
+
+describe('settledPoll', () => {
+  it('keeps polling slowly once a run has settled, and leaves 0 alone', () => {
+    expect(settledPoll(3000, true)).toBe(3000)
+    expect(settledPoll(3000, false)).toBe(30_000)
+    expect(settledPoll(5000, false)).toBe(50_000)
+    expect(settledPoll(0, false)).toBe(0)
   })
 })
 

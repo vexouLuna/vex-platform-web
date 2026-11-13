@@ -77,6 +77,16 @@ watch(
   { immediate: true },
 )
 
+// After a started run the next one begins from scratch, not from this one's payload, pause and kind.
+function resetForm() {
+  const first = props.kinds.some((k) => k.name === props.defaultKind) ? props.defaultKind : (props.kinds[0]?.name ?? '')
+  kind.value = first
+  fromStep.value = ''
+  pauseBefore.value = [...(kindInfo.value?.pause_before ?? [])]
+  paused.value = false
+  payload.value = ''
+}
+
 async function submit() {
   if (!kindInfo.value || parsed.value.error || busy.value) return
   busy.value = true
@@ -93,6 +103,7 @@ async function submit() {
       paused: paused.value,
     })
     open.value = false
+    resetForm()
     emit('started', job)
   } catch (e) {
     error.value = e
