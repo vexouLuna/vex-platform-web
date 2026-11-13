@@ -42,7 +42,7 @@
     "release": "changeset version"
   },
   "peerDependencies": {
-    "vue": "^3.5.44"
+    "vue": "^3.5.45"
   },
   "peerDependenciesMeta": {
     "vue": {
