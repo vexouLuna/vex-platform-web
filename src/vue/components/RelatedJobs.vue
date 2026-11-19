@@ -47,8 +47,10 @@ const { data: subjectPage, refresh: refreshSubject } = usePoll<JobOut[]>(
   },
   (): number => (subjectActive ? props.poll : 0),
 )
+// Two sources, not one getter returning an array: that would be a new array on each poll of the run, and so clear
+// and refetch both lists (the section leaving the page and coming back) every time.
 watch(
-  () => [props.job.id, props.job.subject] as const,
+  [() => props.job.id, () => props.job.subject],
   () => {
     related.value = null
     subjectPage.value = null
