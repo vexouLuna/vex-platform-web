@@ -27,6 +27,9 @@ const props = withDefaults(
 const ui = usePlatformUi()
 
 const anyActive = (runs: readonly JobOut[] | undefined) => !!runs?.some((j) => j.id !== props.job.id && isActive(j.state))
+// While this run is active it can queue others at any time, so both lists are read again on each poll; the data is
+// swapped when the answer arrives, so what is shown stays put meanwhile.
+const wait = (othersActive: boolean): number => (othersActive || isActive(props.job.state) ? props.poll : 0)
 
 let treeActive = false
 const { data: related, refresh: refreshTree } = usePoll<RelatedOut>(
@@ -35,7 +38,7 @@ const { data: related, refresh: refreshTree } = usePoll<RelatedOut>(
     treeActive = anyActive(r.items)
     return r
   },
-  (): number => (treeActive ? props.poll : 0),
+  (): number => wait(treeActive),
 )
 let subjectActive = false
 const { data: subjectPage, refresh: refreshSubject } = usePoll<JobOut[]>(
@@ -45,7 +48,7 @@ const { data: subjectPage, refresh: refreshSubject } = usePoll<JobOut[]>(
     subjectActive = anyActive(items)
     return items
   },
-  (): number => (subjectActive ? props.poll : 0),
+  (): number => wait(subjectActive),
 )
 // Two sources, not one getter returning an array: that would be a new array on each poll of the run, and so clear
 // and refetch both lists (the section leaving the page and coming back) every time.
@@ -62,7 +65,9 @@ watch(
 watch(
   () => props.job.state,
   (now, before) => {
-    if (before && now !== before) refreshTree()
+    if (!before || now === before) return
+    refreshTree()
+    refreshSubject()
   },
 )
 

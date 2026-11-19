@@ -31,4 +31,23 @@ describe('RelatedJobs', () => {
     expect(fetch.mock.calls.length).toBe(calls)
     w.unmount()
   })
+
+  it('shows a run queued while this one is running, with the rows already there left in place', async () => {
+    const job = jobs.items[0] as JobOut
+    const done = { ...job, id: 813, kind: 'censor', parent_id: job.id, state: 'succeeded' } as JobOut
+    const items = [job, done]
+    const fetch = vi.fn(async (url: string) => json(url.includes('/related') ? { root_id: job.id, items, truncated: false } : { items, next_cursor: null }))
+    const client = new PlatformClient({ base: '/api/v2', fetch })
+    const w = mount(RelatedJobs, { props: { client, job, poll: 10 }, attachTo: document.body })
+    for (let i = 0; i < 3; i++) await flush()
+    const rows = w.findAll('.tree li').map((r) => r.element)
+    expect(rows).toHaveLength(2)
+
+    // No other run in the tree is active; this one is, and queues a cleanup.
+    items.push({ ...job, id: 814, kind: 'cleanup', parent_id: job.id, state: 'queued' } as JobOut)
+    await vi.waitFor(() => expect(w.findAll('.tree li')).toHaveLength(3))
+    const after = w.findAll('.tree li').map((r) => r.element)
+    expect(rows.every((el, i) => el === after[i])).toBe(true)
+    w.unmount()
+  })
 })
