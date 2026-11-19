@@ -190,6 +190,10 @@ export interface JobUpdate {
   /** Steps to pause before; null goes back to the kind's. */
   pause_before?: string[] | null
   pause_next?: boolean
+  /** The whole new payload, for a run that is not running (vex-platform 0.12+). */
+  payload?: Record<string, unknown>
+  /** With `payload`: the run's `updated_at` as read; a run changed since is a 409 `job_conflict`. */
+  expected_updated_at?: string
 }
 
 export type AuditOutcome = 'ok' | 'denied' | 'failed'

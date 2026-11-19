@@ -4,7 +4,7 @@
 import { computed, ref, watch } from 'vue'
 import { auditActor } from '../../audit'
 import type { PlatformClient } from '../../client'
-import { EVENT_LEVELS, duration, isActive, jobActions, progressRatio, progressText, runTime, scheduledFor, settledPoll, stepStates } from '../../jobs'
+import { EVENT_LEVELS, duration, isActive, jobActions, parsePayload, progressRatio, progressText, runTime, scheduledFor, settledPoll, stepStates } from '../../jobs'
 import type { EventLevel, JobKindOut, JobOut } from '../../types'
 import { usePlatformUi } from '../config'
 import { useEventTail } from '../useEventTail'
@@ -130,6 +130,26 @@ function retry() {
   retryGates.value = null
 }
 
+// The payload editor: the whole payload as JSON, saved only if the run hasn't changed since the editor opened.
+const draft = ref<string | null>(null) // null: not editing
+const draftOf = ref('') // the run's updated_at when the editor opened
+const saveError = ref<string | null>(null)
+const parsed = computed(() => (draft.value === null ? null : parsePayload(draft.value)))
+function editPayload() {
+  if (!job.value) return
+  draft.value = JSON.stringify(job.value.payload ?? {}, null, 2)
+  draftOf.value = job.value.updated_at
+  saveError.value = null
+}
+// An empty editor is not a payload: the run's payload is always an object ({} for none).
+const draftError = computed(() => (parsed.value && !parsed.value.payload ? (parsed.value.error ?? 'Must be a JSON object.') : null))
+async function savePayload() {
+  if (!parsed.value?.payload) return
+  const saved = await run.update(props.id, { payload: parsed.value.payload, expected_updated_at: draftOf.value }, 'Payload saved')
+  if (saved) draft.value = null
+  saveError.value = saved ? null : run.error.value
+}
+
 const dialog = ref<HTMLDialogElement | null>(null)
 function cancel() {
   dialog.value?.close()
@@ -240,9 +260,43 @@ defineExpose({ refresh })
               <span :style="ratio === null ? undefined : { width: `${ratio * 100}%` }" />
             </div>
           </div>
-          <template v-if="payloadText">
-            <h2 class="vxp-eyebrow">Payload</h2>
-            <pre class="payload vxp-panel vxp-mono">{{ payloadText }}</pre>
+          <template v-if="payloadText || actions?.editPayload || draft !== null">
+            <div class="payload-head">
+              <h2 class="vxp-eyebrow">Payload</h2>
+              <button v-if="actions?.editPayload && draft === null" type="button" class="vxp-btn sm edit-payload" :disabled="!!busy" @click="editPayload">
+                Edit payload
+              </button>
+            </div>
+            <form v-if="draft !== null" class="payload-edit" @submit.prevent="savePayload">
+              <textarea
+                v-model="draft"
+                class="vxp-input vxp-mono payload-text"
+                aria-label="Payload (JSON)"
+                spellcheck="false"
+                :aria-invalid="draftError ? 'true' : undefined"
+                aria-describedby="vxp-payload-help"
+                :disabled="busy === 'update'"
+              />
+              <p v-if="draftError" id="vxp-payload-help" class="vxp-small invalid" role="status">{{ draftError }}</p>
+              <p v-else id="vxp-payload-help" class="vxp-small vxp-muted">
+                The whole payload, as JSON. The steps read it the next time the job runs; the change is audited.
+              </p>
+              <p v-if="job.state === 'running'" class="vxp-callout warn">The job is running now; it can be saved once it stops.</p>
+              <div v-if="saveError" class="vxp-callout error" role="alert"><strong>Couldn't save the payload</strong> {{ saveError }}</div>
+              <div class="actions">
+                <button
+                  type="submit"
+                  class="vxp-btn primary"
+                  :disabled="!!busy || job.state === 'running' || !!draftError"
+                  :aria-busy="busy === 'update'"
+                >
+                  Save payload
+                </button>
+                <button type="button" class="vxp-btn" :disabled="busy === 'update'" @click="draft = null">Discard</button>
+              </div>
+            </form>
+            <pre v-else-if="payloadText" class="payload vxp-panel vxp-mono">{{ payloadText }}</pre>
+            <p v-else class="vxp-small vxp-muted">Empty.</p>
           </template>
         </section>
 
@@ -316,4 +370,10 @@ h2 { margin: 0 0 8px; }
 .pause-next { margin-bottom: 12px; }
 .progress { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .payload { margin: 0; padding: 10px 12px; font-size: 12px; overflow: auto; }
+.payload-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.payload-head h2 { margin-bottom: 8px; }
+.payload-edit { display: flex; flex-direction: column; gap: 8px; }
+.payload-edit p { margin: 0; }
+.payload-text { width: 100%; box-sizing: border-box; min-height: 260px; resize: vertical; font-family: var(--vxp-mono); font-size: 12px; line-height: 1.45; white-space: pre; tab-size: 2; }
+.invalid { color: var(--vxp-bad); }
 </style>
