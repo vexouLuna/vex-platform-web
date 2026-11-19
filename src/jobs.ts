@@ -39,6 +39,8 @@ export function jobActions(job: Pick<JobOut, 'state' | 'cancel_requested' | 'dis
     dismiss: (job.state === 'failed' || job.state === 'cancelled') && !job.dismissed_at,
     /** Pause gates and pause-next can be changed while the run is active. */
     edit: isActive(job.state),
+    /** The payload can be replaced while the run is not running (vex-platform 0.12+). */
+    editPayload: job.state !== 'running',
   }
 }
 
