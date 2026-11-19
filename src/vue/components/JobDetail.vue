@@ -111,8 +111,9 @@ const togglePauseNext = (on: boolean) =>
 
 // A retry: from a step (where it stopped; the first one for a succeeded run), now or later, with its own pause steps.
 const retryStep = ref('')
+// Two sources, so a poll that changes neither leaves the step picked in the retry select alone.
 watch(
-  () => [job.value?.step, job.value?.state],
+  [() => job.value?.step, () => job.value?.state],
   () => (retryStep.value = (job.value?.state === 'succeeded' ? null : job.value?.step) ?? job.value?.steps[0] ?? ''),
   { immediate: true },
 )
