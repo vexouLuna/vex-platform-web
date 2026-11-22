@@ -47,15 +47,15 @@ describe('jobActions', () => {
   it('allows what vex-platform allows in each state', () => {
     const table = (['queued', 'running', 'paused', 'succeeded', 'failed', 'cancelled'] as const).map((s) => {
       const a = jobActions(as(s))
-      return [s, a.pause, a.resume, a.retry, a.cancel, a.edit]
+      return [s, a.pause, a.resume, a.retry, a.cancel, a.edit, a.editPayload]
     })
     expect(table).toEqual([
-      ['queued', true, false, false, true, true],
-      ['running', true, false, false, true, true],
-      ['paused', false, true, false, true, true],
-      ['succeeded', false, false, true, false, false],
-      ['failed', false, false, true, false, false],
-      ['cancelled', false, false, true, false, false],
+      ['queued', true, false, false, true, true, true],
+      ['running', true, false, false, true, true, false],
+      ['paused', false, true, false, true, true, true],
+      ['succeeded', false, false, true, false, false, true],
+      ['failed', false, false, true, false, false, true],
+      ['cancelled', false, false, true, false, false, true],
     ])
   })
 
