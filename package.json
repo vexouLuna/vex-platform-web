@@ -50,18 +50,18 @@
     }
   },
   "devDependencies": {
-    "@changesets/cli": "^3.0.3",
-    "@histoire/plugin-vue": "^1.0.0-beta.1",
-    "@types/node": "^22.20.5",
-    "@vitejs/plugin-vue": "^6.0.10",
-    "@vue/test-utils": "^2.5.1",
+    "@changesets/cli": "^3.1.0",
+    "@histoire/plugin-vue": "^1.0.0-beta.2",
+    "@types/node": "^22.20.7",
+    "@vitejs/plugin-vue": "^6.0.11",
+    "@vue/test-utils": "^2.6.0",
     "happy-dom": "^21.0.4",
-    "histoire": "^1.0.0-beta.1",
+    "histoire": "^1.0.0-beta.2",
     "typescript": "~5.9.3",
-    "vite": "^7.3.7",
+    "vite": "^7.3.8",
     "vitest": "^4.1.12",
-    "vue": "^3.5.44",
-    "vue-tsc": "^3.3.13"
+    "vue": "^3.5.46",
+    "vue-tsc": "^3.3.14"
   },
   "engines": {
     "node": ">=22"
